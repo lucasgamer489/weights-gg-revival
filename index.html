@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weights.gg Revival</title>
     <style>
-        /* DESIGN PREMIUM MODO CLARO — WEIGHTS.GG ORIGINAL */
+        /* CORE DESIGN — CLARO E PREMIUM DO WEIGHTS.GG ORIGINAL */
         :root {
-            --bg-body: #f8f9fa;        
-            --bg-card: #ffffff;        
-            --border-gray: #eef1f4;    
-            --text-dark: #0f1115;      
-            --text-muted: #656e7b;     
-            --search-bg: #f1f3f5;      
+            --bg-body: #f8f9fa;        /* Fundo cinza claro oficial */
+            --bg-card: #ffffff;        /* Blocos e cartões brancos destacados */
+            --border-gray: #eef1f4;    /* Linhas e divisórias limpas */
+            --text-dark: #0f1115;      /* Preto para títulos principais */
+            --text-muted: #656e7b;     /* Cinza médio para descrições */
+            --search-bg: #f1f3f5;      /* Fundo cinza sutil da busca */
         }
 
         * {
@@ -29,7 +29,7 @@
             padding-top: 80px;
         }
 
-        /* HEADER SUPERIOR FIXO */
+        /* HEADER SUPERIOR FIXO COM PESQUISA ESTILIZADA */
         .topbar {
             position: fixed;
             top: 0;
@@ -91,7 +91,6 @@
             background-color: var(--text-dark);
         }
 
-        /* CAIXA DE PESQUISA PREMIUM CENTRALIZADA */
         .search-container {
             position: relative;
             width: 380px;
@@ -125,7 +124,7 @@
             opacity: 0.4;
         }
 
-        /* CONTAINER DUAS COLUNAS PRINCIPAL FIXADO */
+        /* LAYOUT DUAS COLUNAS PRINCIPAL FIXADO CORRETAMENTE */
         .main-layout {
             display: flex;
             width: 100%;
@@ -199,11 +198,6 @@
             font-size: 0.85rem;
             cursor: pointer;
             margin-top: 16px;
-            transition: opacity 0.2s;
-        }
-
-        .btn-discord-sidebar:hover {
-            opacity: 0.9;
         }
 
         /* COLUNA DO FEED DIREITO */
@@ -259,7 +253,7 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.02);
         }
 
-        /* GRID DE CARDS */
+        /* GRID E CARDS DE VOZ DE CAPA CHEIA */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
@@ -368,10 +362,3 @@
             padding: 12px;
             border-radius: 30px;
             font-weight: 700;
-            font-size: 0.9rem;
-            cursor: pointer;
-        }
-    </style>
-</head>
-<body>
-
