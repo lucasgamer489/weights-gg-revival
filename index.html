@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weights.gg Revival</title>
+    <style>
+        :root {
+            --bg-body: #000000;
+            --bg-card: #0a0a0d;
+            --border-gray: #1a1a1f;
+            --text-white: #ffffff;
+            --text-muted: #8e8e93;
+            --search-bg: #111115;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-white);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+            min-height: 100vh;
+        }
+
+        /* TOPBAR PREMIUM DO WEIGHTS ORIGINAL */
+        .topbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background-color: var(--bg-body);
+            border-bottom: 1px solid var(--border-gray);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            z-index: 2000;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .brand-logo {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            cursor: pointer;
+        }
+
+        .topbar-nav {
+            display: flex;
+            gap: 24px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .nav-item {
+            cursor: pointer;
+            padding: 20px 0;
+            transition: color 0.2s;
+        }
+
+        .nav-item:hover {
+            color: var(--text-white);
+        }
+
+        .nav-item.active {
+            color: var(--text-white);
+            border-bottom: 2px solid var(--text-white);
+        }
+
+        .search-container {
+            position: relative;
+            width: 320px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 16px 10px 36px;
+            background-color: var(--search-bg);
+            border: 1px solid var(--border-gray);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--text-white);
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--text-muted);
+        }
+
+        .search-container::before {
+            content: "🔍";
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.8rem;
+            opacity: 0.5;
+        }
+
+        /* LAYOUT DUAS COLUNAS */
+        .main-layout {
+            display: flex;
+            width: 100%;
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 96px 32px 32px 32px;
+            gap: 32px;
+        }
+
+        .sidebar-left {
+            width: 255px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel-card {
+            background-color: var(--bg-card);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--border-gray);
+        }
+
+        .panel-card h4 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+            font-weight: 700;
+        }
+
+        .quick-options {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .option-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+        }
+
+        .option-row:hover {
+            background-color: var(--search-bg);
+            color: var(--text-white);
+        }
+
+        .option-row.img-mode { border-left: 3px solid #facc15; }
+        .option-row.song-mode { border-left: 3px solid #4ade80; }
+        .option-row.vid-mode { border-left: 3px solid #f87171; }
+        .option-row.cov-mode { border-left: 3px solid #3b82f6; }
+
+        .btn-discord-monochrome {
+            width: 100%;
+            background-color: var(--text-white);
+            color: var(--bg-body);
+            border: none;
+            padding: 12px;
+            border-radius: 24px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            margin-top: 14px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-discord-monochrome:hover {
+            opacity: 0.9;
+        }
+
+        .main-feed {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .welcome-banner {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-gray);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+
+        .welcome-banner h2 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .welcome-banner p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .categories-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .filter-btn {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-gray);
+            color: var(--text-muted);
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active, .filter-btn:hover {
+            background-color: var(--text-white);
+            color: var(--bg-body);
+            border-color: var(--text-white);
+        }
+
+        /* GRID E CARDS DE VOZ GRINGOS */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 24px;
+        }
+
+        .voice-hub-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-gray);
+            border-radius: 14px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: border-color 0.2s;
+        }
+
+        .voice-hub-card:hover {
+            border-color: var(--text-muted);
+        }
+
+        .card-cover-wrapper {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            position: relative;
+            background-color: #1a1a1f;
+        }
+
+        .card-cover-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .play-indicator {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            width: 36px;
+            height: 36px;
+            background-color: var(--text-white);
+            color: var(--bg-body);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        .card-footer-info {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex-grow: 1;
+        }
+
+        .card-footer-info h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        .card-footer-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: auto;
+            padding-top: 10px;
+        }
+
+        .btn-use-text {
+            background: none;
+            border: none;
+            color: var(--text-white);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* PAINEL IMPORTAÇÃO DE CABEÇA */
+        .import-box {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            max-width: 500px;
+            margin: 20px 0;
+        }
+
+        .import-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-gray);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background-color: var(--search-bg);
+            color: var(--text-white);
+        }
+
+        .import-input:focus {
+            outline: none;
+            border-color: var(--text-muted);
+        }
+
+        .btn-submit-model {
+            background-color: var(--text-white);
+            color: var(--bg-body);
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CABEÇALHO COM BUSCA À DIREITA -->
+    <header class="topbar">
+        <div class="topbar-left">
+            <div class="brand-logo" onclick="window.location.reload()">Weights.gg</div>
+            <nav class="topbar-nav">
+                <span class="nav-item active" onclick="changeTab('feed', this)">Feed</span>
+                <span class="nav-item" onclick="changeTab('creations', this)">My Creations</span>
+                <span class="nav-item" onclick="changeTab('models', this)">My Models</span>
+                <span class="nav-item" onclick="changeTab('train', this)">Train Model</span>
+            </nav>
+        </div>
+        <div class="search-container">
