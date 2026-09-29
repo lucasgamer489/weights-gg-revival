@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weights.gg Revival</title>
     <style>
-        /* PALETA MODO CLARO PREMIUM — WEIGHTS.GG ORIGINAL */
+        /* DESIGN PREMIUM MODO CLARO — WEIGHTS.GG ORIGINAL */
         :root {
             --bg-body: #f8f9fa;        
             --bg-card: #ffffff;        
@@ -84,14 +84,14 @@
         .nav-item.active::after {
             content: "";
             position: absolute;
-            bottom: -2px;
+            bottom: 0;
             left: 0;
             right: 0;
             height: 2px;
             background-color: var(--text-dark);
         }
 
-        /* PESQUISA ARREDONDADA */
+        /* CAIXA DE PESQUISA PREMIUM CENTRALIZADA */
         .search-container {
             position: relative;
             width: 380px;
@@ -125,7 +125,7 @@
             opacity: 0.4;
         }
 
-        /* CONTAINER CENTRAL DE LAYOUT */
+        /* CONTAINER DUAS COLUNAS PRINCIPAL FIXADO */
         .main-layout {
             display: flex;
             width: 100%;
@@ -135,7 +135,7 @@
             gap: 40px;
         }
 
-        /* SIDEBAR DA ESQUERDA */
+        /* COLUNA DA ESQUERDA (SIDEBAR) */
         .sidebar-left {
             width: 260px;
             flex-shrink: 0;
@@ -176,7 +176,7 @@
             font-weight: 700;
             border-radius: 12px;
             cursor: pointer;
-            transition: background 0.2s ease, transform 0.1s;
+            transition: background 0.2s ease;
         }
 
         .option-row:hover {
@@ -206,7 +206,7 @@
             opacity: 0.9;
         }
 
-        /* CONTEÚDO DO FEED PRINCIPAL */
+        /* COLUNA DO FEED DIREITO */
         .main-feed {
             flex: 1;
             display: flex;
@@ -259,7 +259,7 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.02);
         }
 
-        /* GRID E CARTÕES */
+        /* GRID DE CARDS */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
@@ -343,7 +343,7 @@
             font-size: 0.8rem;
         }
 
-        /* FORMULÁRIO DE IMPORTAÇÃO */
+        /* FORMULÁRIO DE IMPORTAÇÃO (MY MODELS) */
         .import-box {
             display: flex;
             flex-direction: column;
@@ -375,4 +375,3 @@
 </head>
 <body>
 
-    <!-- NAVBAR TOPO -->
