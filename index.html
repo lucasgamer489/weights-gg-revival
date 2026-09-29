@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weights.gg Revival</title>
     <style>
+        /* DESIGN MONOCROMÁTICO ORIGINAL DO WEIGHTS.GG */
         :root {
-            --bg-body: #000000;
-            --bg-card: #0a0a0d;
-            --border-gray: #1a1a1f;
-            --text-white: #ffffff;
-            --text-muted: #8e8e93;
+            --bg-body: #000000;         /* Preto puro de fundo */
+            --bg-card: #0b0b0e;         /* Cinza-escuro profundo fosco para painéis e cartões */
+            --border-line: #1c1c22;     /* Linhas e divisórias finas e discretas */
+            --text-white: #ffffff;      /* Branco puro para destaques principais */
+            --text-gray: #8e8e93;       /* Cinza para textos secundários e mídias */
             --search-bg: #111115;
         }
 
@@ -27,7 +28,7 @@
             min-height: 100vh;
         }
 
-        /* TOPBAR PREMIUM DO WEIGHTS ORIGINAL */
+        /* BARRA SUPERIOR FIXA DO HEADER */
         .topbar {
             position: fixed;
             top: 0;
@@ -35,7 +36,7 @@
             right: 0;
             height: 64px;
             background-color: var(--bg-body);
-            border-bottom: 1px solid var(--border-gray);
+            border-bottom: 1px solid var(--border-line);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -50,7 +51,7 @@
         }
 
         .brand-logo {
-            font-size: 1.25rem;
+            font-size: 1.3rem;
             font-weight: 800;
             letter-spacing: -0.04em;
             cursor: pointer;
@@ -61,12 +62,12 @@
             gap: 24px;
             font-size: 0.85rem;
             font-weight: 600;
-            color: var(--text-muted);
+            color: var(--text-gray);
         }
 
         .nav-item {
             cursor: pointer;
-            padding: 20px 0;
+            padding: 22px 0;
             transition: color 0.2s;
         }
 
@@ -81,14 +82,14 @@
 
         .search-container {
             position: relative;
-            width: 320px;
+            width: 340px;
         }
 
         .search-input {
             width: 100%;
-            padding: 10px 16px 10px 36px;
+            padding: 10px 16px 10px 38px;
             background-color: var(--search-bg);
-            border: 1px solid var(--border-gray);
+            border: 1px solid var(--border-line);
             border-radius: 20px;
             font-size: 0.85rem;
             color: var(--text-white);
@@ -97,7 +98,7 @@
 
         .search-input:focus {
             outline: none;
-            border-color: var(--text-muted);
+            border-color: var(--text-gray);
         }
 
         .search-container::before {
@@ -110,7 +111,7 @@
             opacity: 0.5;
         }
 
-        /* LAYOUT DUAS COLUNAS */
+        /* ESTRUTURA PRINCIPAL DE DUAS COLUNAS INTEGRADA */
         .main-layout {
             display: flex;
             width: 100%;
@@ -120,6 +121,7 @@
             gap: 32px;
         }
 
+        /* COLUNA DA ESQUERDA (SIDEBAR) */
         .sidebar-left {
             width: 255px;
             flex-shrink: 0;
@@ -132,14 +134,14 @@
             background-color: var(--bg-card);
             border-radius: 16px;
             padding: 20px;
-            border: 1px solid var(--border-gray);
+            border: 1px solid var(--border-line);
         }
 
         .panel-card h4 {
-            font-size: 0.75rem;
+            font-size: 0.78rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            color: var(--text-muted);
+            color: var(--text-gray);
             margin-bottom: 14px;
             font-weight: 700;
         }
@@ -159,7 +161,7 @@
             font-weight: 700;
             border-radius: 10px;
             cursor: pointer;
-            color: var(--text-muted);
+            color: var(--text-gray);
             transition: all 0.2s ease;
         }
 
@@ -168,12 +170,12 @@
             color: var(--text-white);
         }
 
-        .option-row.img-mode { border-left: 3px solid #facc15; }
-        .option-row.song-mode { border-left: 3px solid #4ade80; }
-        .option-row.vid-mode { border-left: 3px solid #f87171; }
-        .option-row.cov-mode { border-left: 3px solid #3b82f6; }
+        .option-row.img-mode { border-left: 3.5px solid #facc15; }
+        .option-row.song-mode { border-left: 3.5px solid #4ade80; }
+        .option-row.vid-mode { border-left: 3.5px solid #f87171; }
+        .option-row.cov-mode { border-left: 3.5px solid #3b82f6; }
 
-        .btn-discord-monochrome {
+        .btn-discord-mono {
             width: 100%;
             background-color: var(--text-white);
             color: var(--bg-body);
@@ -187,10 +189,11 @@
             transition: opacity 0.2s;
         }
 
-        .btn-discord-monochrome:hover {
+        .btn-discord-mono:hover {
             opacity: 0.9;
         }
 
+        /* COLUNA DA DIREITA (FEED DE CONTEÚDO) */
         .main-feed {
             flex: 1;
             display: flex;
@@ -199,7 +202,7 @@
 
         .welcome-banner {
             background-color: var(--bg-card);
-            border: 1px solid var(--border-gray);
+            border: 1px solid var(--border-line);
             border-radius: 16px;
             padding: 24px;
             margin-bottom: 32px;
@@ -213,7 +216,7 @@
 
         .welcome-banner p {
             font-size: 0.85rem;
-            color: var(--text-muted);
+            color: var(--text-gray);
         }
 
         .categories-row {
@@ -224,8 +227,8 @@
 
         .filter-btn {
             background-color: var(--bg-card);
-            border: 1px solid var(--border-gray);
-            color: var(--text-muted);
+            border: 1px solid var(--border-line);
+            color: var(--text-gray);
             padding: 8px 18px;
             border-radius: 20px;
             font-size: 0.85rem;
@@ -240,7 +243,7 @@
             border-color: var(--text-white);
         }
 
-        /* GRID E CARDS DE VOZ GRINGOS */
+        /* ESTILO DOS CARDS MINIMALISTAS */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -249,7 +252,7 @@
 
         .voice-hub-card {
             background-color: var(--bg-card);
-            border: 1px solid var(--border-gray);
+            border: 1px solid var(--border-line);
             border-radius: 14px;
             overflow: hidden;
             display: flex;
@@ -258,14 +261,14 @@
         }
 
         .voice-hub-card:hover {
-            border-color: var(--text-muted);
+            border-color: var(--text-gray);
         }
 
         .card-cover-wrapper {
             width: 100%;
             aspect-ratio: 1 / 1;
             position: relative;
-            background-color: #1a1a1f;
+            background-color: #16161a;
         }
 
         .card-cover-wrapper img {
@@ -308,7 +311,7 @@
             justify-content: space-between;
             align-items: center;
             font-size: 0.78rem;
-            color: var(--text-muted);
+            color: var(--text-gray);
             margin-top: auto;
             padding-top: 10px;
         }
@@ -321,7 +324,7 @@
             cursor: pointer;
         }
 
-        /* PAINEL IMPORTAÇÃO DE CABEÇA */
+        /* PAINEL INTERATIVO DE IMPORTAÇÃO */
         .import-box {
             display: flex;
             flex-direction: column;
@@ -333,7 +336,7 @@
         .import-input {
             width: 100%;
             padding: 12px;
-            border: 1px solid var(--border-gray);
+            border: 1px solid var(--border-line);
             border-radius: 8px;
             font-size: 0.9rem;
             background-color: var(--search-bg);
@@ -342,7 +345,7 @@
 
         .import-input:focus {
             outline: none;
-            border-color: var(--text-muted);
+            border-color: var(--text-gray);
         }
 
         .btn-submit-model {
@@ -359,15 +362,8 @@
 </head>
 <body>
 
-    <!-- CABEÇALHO COM BUSCA À DIREITA -->
+    <!-- CABEÇALHO COM BUSCA INTEGRADA NO LUGAR CERTO -->
     <header class="topbar">
         <div class="topbar-left">
             <div class="brand-logo" onclick="window.location.reload()">Weights.gg</div>
             <nav class="topbar-nav">
-                <span class="nav-item active" onclick="changeTab('feed', this)">Feed</span>
-                <span class="nav-item" onclick="changeTab('creations', this)">My Creations</span>
-                <span class="nav-item" onclick="changeTab('models', this)">My Models</span>
-                <span class="nav-item" onclick="changeTab('train', this)">Train Model</span>
-            </nav>
-        </div>
-        <div class="search-container">
