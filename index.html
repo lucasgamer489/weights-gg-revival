@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weights.gg Revival</title>
     <style>
-        /* ESTILO PREMIUM MODO CLARO — WEIGHTS.GG ORIGINAL */
+        /* PALETA MODO CLARO PREMIUM — WEIGHTS.GG ORIGINAL */
         :root {
             --bg-body: #f8f9fa;        
             --bg-card: #ffffff;        
@@ -26,9 +26,10 @@
             color: var(--text-dark);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
             min-height: 100vh;
+            padding-top: 80px;
         }
 
-        /* BARRA SUPERIOR FIXA */
+        /* HEADER SUPERIOR FIXO */
         .topbar {
             position: fixed;
             top: 0;
@@ -83,14 +84,14 @@
         .nav-item.active::after {
             content: "";
             position: absolute;
-            bottom: 0;
+            bottom: -2px;
             left: 0;
             right: 0;
             height: 2px;
             background-color: var(--text-dark);
         }
 
-        /* CAIXA DE BUSCA ARREDONDADA */
+        /* PESQUISA ARREDONDADA */
         .search-container {
             position: relative;
             width: 380px;
@@ -124,17 +125,17 @@
             opacity: 0.4;
         }
 
-        /* LAYOUT DUAS COLUNAS PRINCIPAL CORRETAMENTE ABERTO */
+        /* CONTAINER CENTRAL DE LAYOUT */
         .main-layout {
             display: flex;
             width: 100%;
             max-width: 1440px;
             margin: 0 auto;
-            padding: 96px 40px 40px 40px;
+            padding: 0 40px 40px 40px;
             gap: 40px;
         }
 
-        /* COLUNA DA ESQUERDA */
+        /* SIDEBAR DA ESQUERDA */
         .sidebar-left {
             width: 260px;
             flex-shrink: 0;
@@ -205,7 +206,7 @@
             opacity: 0.9;
         }
 
-        /* COLUNA DO FEED PRINCIPAL */
+        /* CONTEÚDO DO FEED PRINCIPAL */
         .main-feed {
             flex: 1;
             display: flex;
@@ -258,7 +259,7 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.02);
         }
 
-        /* GRID DE CARDS */
+        /* GRID E CARTÕES */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
@@ -342,7 +343,7 @@
             font-size: 0.8rem;
         }
 
-        /* FORMULÁRIO DE IMPORTAÇÃO (MY MODELS) */
+        /* FORMULÁRIO DE IMPORTAÇÃO */
         .import-box {
             display: flex;
             flex-direction: column;
@@ -374,3 +375,4 @@
 </head>
 <body>
 
+    <!-- NAVBAR TOPO -->
