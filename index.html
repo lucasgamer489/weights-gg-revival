@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weights.gg Revival</title>
     <style>
+        /* DESIGN MODO CLARO ORIGINAL DO WEIGHTS.GG */
         :root {
             --bg-body: #f8f9fa;        
             --bg-card: #ffffff;        
@@ -27,7 +28,7 @@
             min-height: 100vh;
         }
 
-        /* TOPBAR DO MODO CLARO */
+        /* HEADER SUPERIOR FIXO */
         .topbar {
             position: fixed;
             top: 0;
@@ -89,7 +90,7 @@
             background-color: var(--text-dark);
         }
 
-        /* CAIXA DE PESQUISA PREMIUM */
+        /* BARRA DE PESQUISA PREMIUM */
         .search-container {
             position: relative;
             width: 380px;
@@ -123,7 +124,7 @@
             opacity: 0.4;
         }
 
-        /* CONTAINER DUAS COLUNAS PRINCIPAL FIXADO */
+        /* CONFIGURAÇÃO DO CORPO EM DUAS COLUNAS */
         .main-layout {
             display: flex;
             width: 100%;
@@ -174,7 +175,7 @@
             font-weight: 700;
             border-radius: 12px;
             cursor: pointer;
-            transition: background 0.2s ease, transform 0.1s;
+            transition: background 0.2s ease;
         }
 
         .option-row:hover {
@@ -197,14 +198,9 @@
             font-size: 0.85rem;
             cursor: pointer;
             margin-top: 16px;
-            transition: opacity 0.2s;
         }
 
-        .btn-discord-sidebar:hover {
-            opacity: 0.9;
-        }
-
-        /* COLUNA DO FEED DIREITO */
+        /* COLUNA DO FEED PRINCIPAL */
         .main-feed {
             flex: 1;
             display: flex;
@@ -217,7 +213,6 @@
             border-radius: 20px;
             padding: 28px;
             margin-bottom: 36px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
         }
 
         .welcome-banner h2 {
@@ -257,7 +252,7 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.02);
         }
 
-        /* GRID DE CARDS */
+        /* GRID E CARDS DE VOZ */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
@@ -341,7 +336,7 @@
             font-size: 0.8rem;
         }
 
-        /* PAINEL IMPORTAÇÃO DE MY MODELS */
+        /* PAINEL IMPORTAR */
         .import-box {
             display: flex;
             flex-direction: column;
@@ -373,6 +368,8 @@
 </head>
 <body>
 
-    <!-- CABEÇALHO -->
+    <!-- NAVBAR TOPO FIXA -->
     <header class="topbar">
         <div class="topbar-left">
+            <div class="brand-logo" onclick="window.location.reload()">Weights.gg</div>
+            <nav class="topbar-nav">
