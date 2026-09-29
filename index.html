@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weights.gg Revival</title>
     <style>
+        /* DESIGN PREMIUM MODO CLARO — WEIGHTS.GG ORIGINAL */
         :root {
-            --bg-body: #f8f9fa;        
-            --bg-card: #ffffff;        
-            --border-gray: #eef1f4;    
-            --text-dark: #0f1115;      
-            --text-muted: #656e7b;     
-            --search-bg: #f1f3f5;      
+            --bg-body: #f8f9fa;        /* Fundo cinza claro oficial */
+            --bg-card: #ffffff;        /* Blocos e cartões brancos destacados */
+            --border-gray: #eef1f4;    /* Linhas e divisórias limpas */
+            --text-dark: #0f1115;      /* Preto para títulos principais */
+            --text-muted: #656e7b;     /* Cinza médio para descrições */
+            --search-bg: #f1f3f5;      /* Fundo cinza sutil da busca */
         }
 
         * {
@@ -27,7 +28,7 @@
             min-height: 100vh;
         }
 
-        /* BARRA SUPERIOR */
+        /* HEADER PREMIUM REFEITO COM BARRA DE BUSCA COMPLETA */
         .topbar {
             position: fixed;
             top: 0;
@@ -39,14 +40,14 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 32px;
+            padding: 0 40px;
             z-index: 2000;
         }
 
         .topbar-left {
             display: flex;
             align-items: center;
-            gap: 28px;
+            gap: 40px;
         }
 
         .brand-logo {
@@ -58,7 +59,7 @@
 
         .topbar-nav {
             display: flex;
-            gap: 20px;
+            gap: 24px;
             font-size: 0.85rem;
             font-weight: 600;
             color: var(--text-muted);
@@ -66,8 +67,9 @@
 
         .nav-item {
             cursor: pointer;
-            padding-bottom: 4px;
+            padding: 20px 0;
             transition: color 0.2s;
+            position: relative;
         }
 
         .nav-item:hover {
@@ -76,72 +78,85 @@
 
         .nav-item.active {
             color: var(--text-dark);
-            border-bottom: 2px solid var(--text-dark);
         }
 
+        .nav-item.active::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--text-dark);
+        }
+
+        /* CAIXA DE PESQUISA ESTILIZADA DE ALTO ACABAMENTO */
         .search-container {
             position: relative;
-            width: 360px;
+            width: 380px;
         }
 
         .search-input {
             width: 100%;
-            padding: 10px 16px 10px 36px;
+            padding: 10px 16px 10px 40px;
             background-color: var(--search-bg);
             border: 1px solid transparent;
-            border-radius: 24px;
+            border-radius: 30px;
             font-size: 0.85rem;
             color: var(--text-dark);
+            transition: all 0.2s ease;
         }
 
         .search-input:focus {
             outline: none;
             border-color: #cbd5e1;
             background-color: var(--bg-card);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
         }
 
         .search-container::before {
             content: "🔍";
             position: absolute;
-            left: 14px;
+            left: 16px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             opacity: 0.4;
         }
 
-        /* CONTAINER DUAS COLUNAS */
+        /* CONTAINER DUAS COLUNAS PRINCIPAL FIXADO */
         .main-layout {
             display: flex;
             width: 100%;
             max-width: 1440px;
             margin: 0 auto;
-            padding: 96px 32px 32px 32px;
-            gap: 32px;
+            padding: 96px 40px 40px 40px;
+            gap: 40px;
         }
 
+        /* BARRA DA ESQUERDA (SIDEBAR) */
         .sidebar-left {
-            width: 255px;
+            width: 260px;
             flex-shrink: 0;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 24px;
         }
 
         .panel-card {
             background-color: var(--bg-card);
-            border-radius: 16px;
-            padding: 20px;
+            border-radius: 20px;
+            padding: 24px;
             border: 1px solid var(--border-gray);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
         }
 
         .panel-card h4 {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.06em;
             color: var(--text-muted);
-            margin-bottom: 14px;
+            margin-bottom: 16px;
             font-weight: 700;
         }
 
@@ -154,23 +169,27 @@
         .option-row {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 10px 14px;
-            font-size: 0.85rem;
+            gap: 14px;
+            padding: 12px 16px;
+            font-size: 0.9rem;
             font-weight: 700;
-            border-radius: 10px;
+            border-radius: 12px;
             cursor: pointer;
-            transition: background 0.2s ease;
+            transition: background 0.2s ease, transform 0.1s;
         }
 
         .option-row:hover {
             background-color: var(--search-bg);
         }
 
-        .option-row.img-mode { border-left: 3.5px solid #facc15; }
-        .option-row.song-mode { border-left: 3.5px solid #4ade80; }
-        .option-row.vid-mode { border-left: 3.5px solid #f87171; }
-        .option-row.cov-mode { border-left: 3.5px solid #3b82f6; }
+        .option-row:active {
+            transform: scale(0.98);
+        }
+
+        .option-row.img-mode { border-left: 4px solid #facc15; }
+        .option-row.song-mode { border-left: 4px solid #4ade80; }
+        .option-row.vid-mode { border-left: 4px solid #f87171; }
+        .option-row.cov-mode { border-left: 4px solid #3b82f6; }
 
         .btn-discord-sidebar {
             width: 100%;
@@ -178,14 +197,19 @@
             color: white;
             border: none;
             padding: 12px;
-            border-radius: 24px;
+            border-radius: 30px;
             font-weight: 700;
             font-size: 0.85rem;
             cursor: pointer;
-            margin-top: 14px;
+            margin-top: 16px;
+            transition: opacity 0.2s;
         }
 
-        /* COLUNA DO FEED */
+        .btn-discord-sidebar:hover {
+            opacity: 0.9;
+        }
+
+        /* COLUNA DO FEED DIREITO */
         .main-feed {
             flex: 1;
             display: flex;
@@ -195,67 +219,70 @@
         .welcome-banner {
             background-color: var(--bg-card);
             border: 1px solid var(--border-gray);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 32px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.01);
+            border-radius: 20px;
+            padding: 28px;
+            margin-bottom: 36px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
         }
 
         .welcome-banner h2 {
-            font-size: 1.15rem;
+            font-size: 1.3rem;
             font-weight: 800;
+            letter-spacing: -0.02em;
             margin-bottom: 4px;
         }
 
         .welcome-banner p {
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             color: var(--text-muted);
         }
 
         .categories-row {
             display: flex;
-            gap: 10px;
-            margin-bottom: 24px;
+            gap: 12px;
+            margin-bottom: 28px;
         }
 
         .filter-btn {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-gray);
+            background-color: transparent;
+            border: 1px solid transparent;
             color: var(--text-muted);
-            padding: 8px 18px;
-            border-radius: 20px;
-            font-size: 0.85rem;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 0.9rem;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .filter-btn.active, .filter-btn:hover {
-            background-color: var(--text-dark);
-            color: white;
-            border-color: var(--text-dark);
+            background-color: var(--bg-card);
+            color: var(--text-dark);
+            border-color: var(--border-gray);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
         }
 
+        /* GRID DE CARDS COM IMAGEM COMPLETA (FULL COVER) */
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 24px;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 28px;
         }
 
         .voice-hub-card {
             background-color: var(--bg-card);
             border: 1px solid var(--border-gray);
-            border-radius: 16px;
+            border-radius: 20px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.01);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.02);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
         }
 
         .voice-hub-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
+            transform: translateY(-5px);
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.06);
         }
 
         .card-cover-wrapper {
@@ -273,22 +300,27 @@
 
         .play-indicator {
             position: absolute;
-            bottom: 12px;
-            right: 12px;
-            width: 36px;
-            height: 36px;
+            bottom: 16px;
+            right: 16px;
+            width: 38px;
+            height: 38px;
             background-color: rgba(255, 255, 255, 0.95);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.1s;
+        }
+
+        .play-indicator:hover {
+            transform: scale(1.1);
         }
 
         .card-footer-info {
-            padding: 16px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             gap: 2px;
@@ -296,7 +328,7 @@
         }
 
         .card-footer-info h3 {
-            font-size: 0.95rem;
+            font-size: 1rem;
             font-weight: 700;
         }
 
@@ -304,10 +336,10 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.78rem;
+            font-size: 0.8rem;
             color: var(--text-muted);
             margin-top: auto;
-            padding-top: 10px;
+            padding-top: 12px;
         }
 
         .btn-use-text {
@@ -316,10 +348,14 @@
             color: var(--text-dark);
             font-weight: 700;
             cursor: pointer;
-            font-size: 0.78rem;
+            font-size: 0.8rem;
         }
 
-        /* IMPORTAÇÃO */
+        .btn-use-text:hover {
+            text-decoration: underline;
+        }
+
+        /* PAINEL IMPORTAÇÃO DENTRO DE MY MODELS */
         .import-box {
             display: flex;
             flex-direction: column;
@@ -329,41 +365,3 @@
         }
 
         .import-input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--border-gray);
-            border-radius: 8px;
-            font-size: 0.9rem;
-            background-color: var(--search-bg);
-        }
-
-        .import-input:focus {
-            outline: none;
-            border-color: var(--text-dark);
-        }
-
-        .btn-submit-model {
-            background-color: var(--text-dark);
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            cursor: pointer;
-        }
-    </style>
-</head>
-<body>
-
-    <header class="topbar">
-        <div class="topbar-left">
-            <div class="brand-logo" onclick="window.location.reload()">Weights.gg</div>
-            <nav class="topbar-nav">
-                <span class="nav-item active" onclick="changeTab('feed', this)">Feed</span>
-                <span class="nav-item" onclick="changeTab('creations', this)">My Creations</span>
-                <span class="nav-item" onclick="changeTab('models', this)">My Models</span>
-                <span class="nav-item" onclick="changeTab('train', this)">Train Model</span>
-            </nav>
-        </div>
-        <div class="search-container">
