@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weights.gg Revival</title>
     <style>
-        /* DESIGN MODO CLARO ORIGINAL DO WEIGHTS.GG */
+        /* CORE DESIGN — CLARO E MINIMALISTA DO WEIGHTS.GG ORIGINAL */
         :root {
-            --bg-body: #f8f9fa;        
-            --bg-card: #ffffff;        
-            --border-gray: #eef1f4;    
-            --text-dark: #0f1115;      
-            --text-muted: #656e7b;     
-            --search-bg: #f1f3f5;      
+            --bg-body: #f8f9fa;        /* Fundo cinza claro oficial */
+            --bg-card: #ffffff;        /* Blocos e cartões brancos */
+            --border-gray: #eef1f4;    /* Linhas e divisórias limpas */
+            --text-dark: #0f1115;      /* Preto para títulos principais */
+            --text-muted: #656e7b;     /* Cinza médio para descrições */
+            --search-bg: #f1f3f5;      /* Fundo da barra de busca */
         }
 
         * {
@@ -28,7 +28,7 @@
             min-height: 100vh;
         }
 
-        /* HEADER SUPERIOR FIXO */
+        /* HEADER SUPERIOR FIXO COM PESQUISA */
         .topbar {
             position: fixed;
             top: 0;
@@ -90,7 +90,6 @@
             background-color: var(--text-dark);
         }
 
-        /* BARRA DE PESQUISA PREMIUM */
         .search-container {
             position: relative;
             width: 380px;
@@ -124,7 +123,7 @@
             opacity: 0.4;
         }
 
-        /* CONFIGURAÇÃO DO CORPO EM DUAS COLUNAS */
+        /* ESTRUTURA DUAS COLUNAS PRINCIPAL FIXADA */
         .main-layout {
             display: flex;
             width: 100%;
@@ -175,7 +174,7 @@
             font-weight: 700;
             border-radius: 12px;
             cursor: pointer;
-            transition: background 0.2s ease;
+            transition: background 0.2s ease, transform 0.1s;
         }
 
         .option-row:hover {
@@ -213,6 +212,7 @@
             border-radius: 20px;
             padding: 28px;
             margin-bottom: 36px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
         }
 
         .welcome-banner h2 {
@@ -252,7 +252,7 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.02);
         }
 
-        /* GRID E CARDS DE VOZ */
+        /* GRID E CARDS DOS MODELOS DE VOZ */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
@@ -336,7 +336,7 @@
             font-size: 0.8rem;
         }
 
-        /* PAINEL IMPORTAR */
+        /* PAINEL IMPORTAÇÃO DENTRO DE MY MODELS */
         .import-box {
             display: flex;
             flex-direction: column;
@@ -363,13 +363,3 @@
             font-weight: 700;
             font-size: 0.9rem;
             cursor: pointer;
-        }
-    </style>
-</head>
-<body>
-
-    <!-- NAVBAR TOPO FIXA -->
-    <header class="topbar">
-        <div class="topbar-left">
-            <div class="brand-logo" onclick="window.location.reload()">Weights.gg</div>
-            <nav class="topbar-nav">
