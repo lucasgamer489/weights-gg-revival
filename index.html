@@ -5,14 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weights.gg Revival</title>
     <style>
-        /* DESIGN PREMIUM MODO CLARO — WEIGHTS.GG ORIGINAL */
         :root {
-            --bg-body: #f8f9fa;        /* Fundo cinza claro oficial */
-            --bg-card: #ffffff;        /* Blocos e cartões brancos destacados */
-            --border-gray: #eef1f4;    /* Linhas e divisórias limpas */
-            --text-dark: #0f1115;      /* Preto para títulos principais */
-            --text-muted: #656e7b;     /* Cinza médio para descrições */
-            --search-bg: #f1f3f5;      /* Fundo cinza sutil da busca */
+            --bg-body: #f8f9fa;        
+            --bg-card: #ffffff;        
+            --border-gray: #eef1f4;    
+            --text-dark: #0f1115;      
+            --text-muted: #656e7b;     
+            --search-bg: #f1f3f5;      
         }
 
         * {
@@ -28,7 +27,7 @@
             min-height: 100vh;
         }
 
-        /* HEADER PREMIUM REFEITO COM BARRA DE BUSCA COMPLETA */
+        /* TOPBAR DO MODO CLARO */
         .topbar {
             position: fixed;
             top: 0;
@@ -90,7 +89,7 @@
             background-color: var(--text-dark);
         }
 
-        /* CAIXA DE PESQUISA ESTILIZADA DE ALTO ACABAMENTO */
+        /* CAIXA DE PESQUISA PREMIUM */
         .search-container {
             position: relative;
             width: 380px;
@@ -134,7 +133,7 @@
             gap: 40px;
         }
 
-        /* BARRA DA ESQUERDA (SIDEBAR) */
+        /* COLUNA DA ESQUERDA (SIDEBAR) */
         .sidebar-left {
             width: 260px;
             flex-shrink: 0;
@@ -180,10 +179,6 @@
 
         .option-row:hover {
             background-color: var(--search-bg);
-        }
-
-        .option-row:active {
-            transform: scale(0.98);
         }
 
         .option-row.img-mode { border-left: 4px solid #facc15; }
@@ -262,7 +257,7 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.02);
         }
 
-        /* GRID DE CARDS COM IMAGEM COMPLETA (FULL COVER) */
+        /* GRID DE CARDS */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
@@ -312,11 +307,6 @@
             font-size: 0.85rem;
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transition: transform 0.1s;
-        }
-
-        .play-indicator:hover {
-            transform: scale(1.1);
         }
 
         .card-footer-info {
@@ -351,11 +341,7 @@
             font-size: 0.8rem;
         }
 
-        .btn-use-text:hover {
-            text-decoration: underline;
-        }
-
-        /* PAINEL IMPORTAÇÃO DENTRO DE MY MODELS */
+        /* PAINEL IMPORTAÇÃO DE MY MODELS */
         .import-box {
             display: flex;
             flex-direction: column;
@@ -365,3 +351,28 @@
         }
 
         .import-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-gray);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            background-color: var(--search-bg);
+        }
+
+        .btn-submit-model {
+            background-color: var(--text-dark);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CABEÇALHO -->
+    <header class="topbar">
+        <div class="topbar-left">
