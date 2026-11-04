@@ -1,769 +1,2237 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weights Revival</title>
-    <style>
-        :root {
-            --bg-sidebar: #ffffff;
-            --bg-main: #ffffff;
-            --bg-search: #f1f5f9;
-            --text-primary: #111111;
-            --text-secondary: #6b7280;
-            --border-color: #e2e8f0;
-            --black: #000000;
-            --white: #ffffff;
-            --hover-gray: #eaeaea;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-main);
-            color: var(--text-primary);
-            overflow-x: hidden;
-        }
-
-        /* =========================================
-           CABEÇALHO SUPERIOR (CONSERTADO)
-           ========================================= */
-        .top-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 70px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 24px;
-            background: #fff;
-            z-index: 1000;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        /* Bloco 1: Logo na extrema esquerda */
-        .header-left {
-            flex: 1; /* Ocupa 1 parte do espaço */
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 22px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            color: var(--text-primary);
-            white-space: nowrap;
-        }
-
-        .logo span {
-            font-weight: 400;
-        }
-
-        /* Bloco 2: Barra de Pesquisa centralizada */
-        .header-center {
-            flex: 2; /* Ocupa 2 partes do espaço para centralizar perfeitamente */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* DESIGN DA BARRA DE BUSCA (IDÊNTICO AO WEIGHTS) */
-        .search-bar {
-            display: flex;
-            align-items: center;
-            background-color: var(--bg-search); /* Fundo cinza extremamente claro */
-            border-radius: 24px; /* Bordas bem arredondadas */
-            padding: 10px 20px;
-            width: 100%;
-            max-width: 480px; /* Largura elegante */
-            border: 1px solid transparent;
-            transition: all 0.2s ease;
-        }
-
-        .search-bar:focus-within {
-            background-color: #fff;
-            border-color: #cbd5e1;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        }
-
-        .search-icon {
-            width: 20px;
-            height: 20px;
-            fill: #888888;
-            margin-right: 12px;
-            flex-shrink: 0;
-        }
-
-        .search-bar input {
-            border: none;
-            background: transparent;
-            outline: none;
-            font-size: 14px;
-            width: 100%;
-            color: var(--text-primary);
-        }
-
-        .search-bar input::placeholder {
-            color: #9ca3af;
-        }
-
-        /* Bloco 3: Botões e Avatar na ponta direita */
-        .header-right {
-            flex: 1; /* Ocupa 1 parte do espaço */
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .btn-import {
-            background-color: var(--black);
-            color: var(--white);
-            border: none;
-            border-radius: 8px;
-            padding: 10px 16px;
-            font-size: 14px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: opacity 0.2s;
-            white-space: nowrap;
-        }
-
-        .btn-import:hover {
-            opacity: 0.8;
-        }
-
-        .btn-icon {
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 8px;
-            border-radius: 50%;
-            transition: background 0.2s;
-        }
-
-        .btn-icon:hover {
-            background-color: var(--bg-search);
-        }
-
-        .btn-icon svg {
-            width: 20px;
-            height: 20px;
-            fill: var(--text-primary);
-        }
-
-        .avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            object-fit: cover;
-            cursor: pointer;
-            border: 2px solid var(--border-color);
-        }
-
-        /* =========================================
-           CONTAINER DE BAIXO (INTACTO)
-           ========================================= */
-        .main-layout {
-            display: flex;
-            margin-top: 70px;
-            width: 100%;
-            min-height: calc(100vh - 70px);
-        }
-
-        /* =========================================
-           SIDEBAR (INTACTA)
-           ========================================= */
-        .sidebar {
-            width: 250px;
-            min-width: 250px;
-            background: #fff;
-            border-right: 1px solid var(--border-color);
-            padding: 20px;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        .nav-group {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .section-title {
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            margin-bottom: 8px;
-            padding-left: 8px;
-            letter-spacing: 0.5px;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 12px;
-            border-radius: 8px;
-            color: var(--text-primary);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            cursor: pointer;
-            border: none;
-            background: transparent;
-            width: 100%;
-            text-align: left;
-        }
-
-        .nav-item svg {
-            width: 18px;
-            height: 18px;
-            fill: currentColor;
-        }
-
-        .nav-item:hover {
-            background-color: var(--hover-gray);
-        }
-
-        .nav-item.active {
-            background-color: var(--black);
-            color: var(--white);
-        }
-
-        /* =========================================
-           ÁREA DE CONTEÚDO (INTACTA)
-           ========================================= */
-        .content-area {
-            flex-grow: 1;
-            padding: 30px;
-            box-sizing: border-box;
-            overflow-y: auto;
-            background-color: #ffffff;
-        }
-
-        .header-section {
-            margin-bottom: 32px;
-        }
-
-        .header-section h1 {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            letter-spacing: -0.5px;
-        }
-
-        .header-section p {
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
-
-        .filters {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-        }
-
-        .filter-btn {
-            padding: 6px 16px;
-            border-radius: 20px;
-            border: 1px solid var(--border-color);
-            background: var(--white);
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-primary);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .filter-btn.active {
-            background: var(--black);
-            color: var(--white);
-            border-color: var(--black);
-        }
-
-        .filter-btn:hover:not(.active) {
-            background: var(--bg-search);
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            gap: 24px;
-        }
-
-        .card {
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 20px;
-            background: var(--white);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            transition: box-shadow 0.2s;
-        }
-
-        .card:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        }
-
-        .card-img-container {
-            position: relative;
-            margin-bottom: 16px;
-        }
-
-        .card-img {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            object-fit: cover;
-            background-color: #f0f0f0;
-        }
-
-        .play-btn {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            background: var(--black);
-            color: var(--white);
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid var(--white);
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .play-btn:hover {
-            transform: scale(1.1);
-        }
-
-        .play-btn svg {
-            width: 12px;
-            height: 12px;
-            fill: var(--white);
-            margin-left: 2px;
-        }
-
-        .card-title {
-            font-size: 15px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .card-author {
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-bottom: 12px;
-        }
-
-        .tags {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .tag {
-            background: var(--bg-search);
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-        }
-
-        .card-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            border-top: 1px solid var(--border-color);
-            padding-top: 16px;
-            margin-top: auto;
-        }
-
-        .likes {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        .likes svg {
-            width: 14px;
-            height: 14px;
-            fill: currentColor;
-        }
-
-        .use-btn {
-            background: var(--black);
-            color: var(--white);
-            border: none;
-            padding: 6px 16px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: opacity 0.2s;
-        }
-
-        .use-btn:hover {
-            opacity: 0.8;
-        }
-
-        .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 64px 24px;
-            border: 2px dashed var(--border-color);
-            border-radius: 12px;
-            color: var(--text-secondary);
-            text-align: center;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-            max-width: 500px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .form-group input[type="text"], 
-        .form-group select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        .form-group input[type="text"]:focus, 
-        .form-group select:focus {
-            border-color: var(--black);
-        }
-
-        .radio-group {
-            display: flex;
-            gap: 16px;
-            margin-top: 8px;
-        }
-
-        .radio-group label {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-weight: 400;
-            cursor: pointer;
-        }
-
-        .btn-submit {
-            background-color: var(--black);
-            color: var(--white);
-            border: none;
-            border-radius: 8px;
-            padding: 12px 24px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-
-        .btn-submit:hover {
-            opacity: 0.8;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @media (max-width: 1024px) {
-            .header-center {
-                flex: 1;
-            }
-            .search-bar {
-                max-width: 350px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .header-center {
-                display: none;
-            }
-            .sidebar {
-                display: none;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weights Revival - AI Voice Models</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root {
+    --bg-main: #F9FAFB;
+    --bg-sidebar: #FFFFFF;
+    --bg-card: #FFFFFF;
+    --bg-input: #F3F4F6;
+    --bg-hover: #F3F4F6;
+    --bg-tag: #F3F4F6;
+    --bg-tag-hover: #E5E7EB;
+    --border-color: #E5E7EB;
+    --border-light: #F3F4F6;
+    --text-main: #111827;
+    --text-muted: #6B7280;
+    --text-subtle: #9CA3AF;
+    --text-sidebar: #4B5563;
+    --text-tag: #374151;
+    --accent: #000000;
+    --accent-text: #FFFFFF;
+    --accent-purple: #7C3AED;
+    --accent-purple-hover: #6D28D9;
+    --accent-purple-light: #F5F3FF;
+    --accent-purple-tag: #F3E8FF;
+    --accent-purple-tag-text: #7E22CE;
+    --youtube-red: #FF0000;
+    --danger: #EF4444;
+    --success: #10B981;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 45px rgba(0, 0, 0, 0.15);
+    --shadow-dropdown: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+    --overlay: rgba(17, 24, 39, 0.55);
+    --card-cover-bg: linear-gradient(180deg, #F9FAFB 0%, #F3F4F6 100%);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+
+body { background-color: var(--bg-main); color: var(--text-main); height: 100vh; overflow: hidden; display: flex; font-size: 14px; -webkit-font-smoothing: antialiased; }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+
+/* SIDEBAR */
+.sidebar { width: 240px; min-width: 240px; background-color: var(--bg-sidebar); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 20px 12px; overflow-y: auto; z-index: 10; }
+.logo { font-size: 20px; font-weight: 800; margin-bottom: 28px; padding-left: 12px; letter-spacing: -0.5px; color: var(--text-main); display: flex; align-items: center; gap: 6px; }
+.logo span { font-weight: 400; color: var(--text-muted); }
+.nav-group { display: flex; flex-direction: column; gap: 2px; margin-bottom: 20px; }
+.section-title { font-size: 11px; font-weight: 700; color: var(--text-subtle); text-transform: uppercase; margin: 12px 0 8px 12px; letter-spacing: 0.5px; }
+.nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; color: var(--text-sidebar); font-size: 14px; font-weight: 500; transition: all 0.15s ease; cursor: pointer; border: none; background: transparent; width: 100%; text-align: left; font-family: inherit; }
+.nav-item svg { width: 18px; height: 18px; fill: currentColor; flex-shrink: 0; opacity: 0.7; }
+.nav-item:hover { background-color: var(--bg-hover); color: var(--text-main); }
+.nav-item:hover svg { opacity: 1; }
+.nav-item.active { background-color: var(--bg-hover); color: var(--text-main); font-weight: 700; }
+.nav-item.active svg { opacity: 1; }
+
+/* HEADER */
+.main-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+.top-header { height: 68px; background-color: var(--bg-sidebar); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; position: sticky; top: 0; z-index: 100; gap: 20px; }
+.header-left { flex: 1; display: flex; align-items: center; }
+.header-center { flex: 2; display: flex; justify-content: center; max-width: 600px; }
+.header-right { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 8px; position: relative; }
+
+.search-bar { display: flex; align-items: center; background-color: var(--bg-input); border-radius: 12px; padding: 11px 18px; width: 100%; border: 1px solid var(--border-color); transition: all 0.15s ease; }
+.search-bar:focus-within { background-color: var(--bg-card); border-color: #D1D5DB; box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.08); }
+.search-bar svg { width: 18px; height: 18px; fill: var(--text-subtle); margin-right: 12px; flex-shrink: 0; }
+.search-bar input { border: none; background: transparent; outline: none; font-size: 14px; width: 100%; color: var(--text-main); font-weight: 500; }
+.search-bar input::placeholder { color: var(--text-subtle); }
+
+.btn-primary { background-color: var(--accent); color: var(--accent-text); border: none; border-radius: 9999px; padding: 10px 22px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.15s ease; white-space: nowrap; font-family: inherit; }
+.btn-primary:hover { background-color: #1F2937; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
+
+.btn-icon { background: transparent; border: 1px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 8px; border-radius: 50%; transition: all 0.2s ease; color: var(--text-muted); width: 38px; height: 38px; }
+.btn-icon:hover { background-color: var(--bg-hover); color: var(--text-main); }
+.btn-icon svg { width: 20px; height: 20px; fill: currentColor; }
+
+.settings-dropdown-container { position: relative; display: flex; align-items: center; justify-content: center; }
+#settings-btn { width: 38px; height: 38px; border-radius: 50%; background: transparent; border: 1px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); transition: all 0.2s ease; padding: 0; outline: none; }
+#settings-btn:hover { background: var(--bg-hover); color: var(--text-main); }
+#settings-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; transition: transform 0.35s ease; }
+#settings-btn:hover svg { transform: rotate(60deg); }
+#settings-btn.active svg { transform: rotate(180deg); }
+.settings-dropdown { position: absolute; top: calc(100% + 12px); right: 0; width: 270px; max-height: 480px; overflow-y: auto; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 8px; box-shadow: var(--shadow-dropdown); z-index: 1000; display: none; flex-direction: column; gap: 2px; }
+.settings-dropdown.active { display: flex; }
+.settings-header { display: flex; align-items: center; gap: 8px; padding: 10px 12px 6px; font-size: 11px; font-weight: 700; color: var(--text-subtle); text-transform: uppercase; letter-spacing: 1px; }
+.settings-header svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; }
+.settings-divider { height: 1px; background: var(--border-color); margin: 4px 8px; }
+.settings-option { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; background: transparent; border: none; cursor: pointer; transition: all 0.15s; width: 100%; text-align: left; font-family: inherit; }
+.settings-option:hover { background: var(--bg-hover); }
+.settings-option .flag { font-size: 18px; line-height: 1; flex-shrink: 0; width: 24px; text-align: center; }
+.settings-option .lang-name { font-size: 13px; font-weight: 600; color: var(--text-main); flex: 1; }
+.settings-option .lang-code { font-size: 10px; font-weight: 700; color: var(--text-subtle); background: var(--bg-input); padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
+.settings-option .check-icon { width: 14px; height: 14px; fill: none; stroke: var(--accent-purple); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; display: none; flex-shrink: 0; }
+.settings-option.active { background: var(--accent-purple-light); }
+.settings-option.active .check-icon { display: block; }
+.settings-option.active .lang-name { color: var(--accent-purple); }
+
+/* PERFIL */
+.profile-logged-in { position: relative; display: flex; align-items: center; justify-content: center; }
+.profile-logged-in[hidden], .btn-primary[hidden] { display: none; }
+.avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-color); cursor: pointer; transition: all 0.15s ease; }
+.avatar:hover { border-color: var(--accent-purple); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15); }
+.dropdown-menu { position: absolute; top: calc(100% + 14px); right: 0; width: 300px; background: #FFFFFF; border: 1px solid var(--border-color); border-radius: 16px; padding: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 4px 10px -4px rgba(0, 0, 0, 0.05); z-index: 1000; display: none; flex-direction: column; gap: 8px; animation: dropdownFade 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+.dropdown-menu.active { display: flex; }
+@keyframes dropdownFade { from { opacity: 0; transform: translateY(-8px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.dropdown-inner-header { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.2px; padding: 0 4px 8px 4px; }
+.user-profile-block { display: flex; align-items: center; gap: 14px; padding: 14px; background: #FAFAFB; border-radius: 12px; border: 1px solid var(--border-light); margin-bottom: 4px; }
+.user-avatar-wrapper { position: relative; flex-shrink: 0; }
+.user-avatar-large { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid transparent; background: linear-gradient(#FAFAFB, #FAFAFB) padding-box, linear-gradient(135deg, #7C3AED, #C084FC) border-box; display: block; transition: all 0.2s; }
+.avatar-camera-btn { position: absolute; bottom: -3px; right: -3px; width: 22px; height: 22px; border-radius: 50%; background: var(--accent-purple); border: 2px solid #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; padding: 0; box-shadow: 0 2px 6px rgba(124, 58, 237, 0.35); }
+.avatar-camera-btn:hover { background: var(--accent-purple-hover); transform: scale(1.12); }
+.avatar-camera-btn svg { width: 10px; height: 10px; fill: #FFFFFF; }
+.user-details { display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1; }
+.user-name { font-size: 15px; font-weight: 700; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-role-badge { display: inline-flex; align-items: center; gap: 4px; background: var(--accent-purple-tag); color: var(--accent-purple-tag-text); padding: 3px 10px; border-radius: 9999px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; width: fit-content; }
+.user-role-badge svg { fill: currentColor; }
+.dropdown-divider { height: 1px; background: var(--border-light); margin: 4px 0; }
+.dropdown-action { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: transparent; border: none; color: var(--text-sidebar); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s ease; width: 100%; text-align: left; font-family: inherit; outline: none; }
+.dropdown-action:hover { background: var(--bg-hover); color: var(--text-main); }
+.dropdown-action.danger { color: var(--text-sidebar); }
+.dropdown-action.danger:hover { background: #FEF2F2; color: var(--danger); }
+.dropdown-action svg { width: 16px; height: 16px; fill: currentColor; flex-shrink: 0; opacity: 0.75; }
+.dropdown-action:hover svg { opacity: 1; }
+
+/* CONTEÚDO */
+.content-area { flex: 1; min-height: 0; padding: 32px 40px 48px; overflow-y: auto; background-color: var(--bg-main); }
+.page-header { margin-bottom: 28px; }
+.page-header h1 { font-size: 28px; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.5px; color: var(--text-main); }
+.page-header p { color: var(--text-muted); font-size: 15px; }
+.filters { display: flex; gap: 8px; margin-bottom: 32px; flex-wrap: wrap; }
+.filter-btn { padding: 8px 18px; border-radius: 9999px; border: 1px solid transparent; background: var(--bg-tag); font-size: 13px; font-weight: 600; color: var(--text-sidebar); cursor: pointer; transition: all 0.15s ease; font-family: inherit; }
+.filter-btn:hover { background: var(--bg-tag-hover); color: var(--text-main); }
+.filter-btn.active { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 24px; }
+
+.card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; transition: all 0.2s ease; position: relative; box-shadow: var(--shadow-sm); }
+.card:hover { transform: translateY(-3px); border-color: #D1D5DB; box-shadow: var(--shadow-md); }
+.delete-btn { position: absolute; top: 12px; right: 12px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; color: var(--text-subtle); z-index: 10; opacity: 0; }
+.card:hover .delete-btn { opacity: 1; }
+.delete-btn:hover { background: #FEF2F2; border-color: #FECACA; color: var(--danger); }
+.delete-btn svg { width: 15px; height: 15px; fill: currentColor; }
+.card-cover { position: relative; width: 100%; height: 130px; background: var(--card-cover-bg); display: flex; align-items: center; justify-content: center; }
+.avatar-wrapper { position: relative; display: flex; align-items: center; justify-content: center; }
+.card-avatar { width: 76px; height: 76px; border-radius: 50%; object-fit: cover; border: 4px solid #FFFFFF; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); z-index: 1; background-color: #F3F4F6; transition: filter 0.15s ease; }
+.avatar-wrapper:hover .card-avatar { filter: brightness(0.92); }
+.play-button { position: absolute; bottom: -2px; right: -2px; width: 30px; height: 30px; border-radius: 50%; background: var(--accent); border: 2px solid #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; z-index: 5; color: #FFFFFF; padding: 0; outline: none; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); }
+.play-button:hover { background: var(--accent-purple); transform: scale(1.15); }
+.play-button svg { width: 11px; height: 11px; fill: currentColor; }
+.play-button.playing { background: var(--accent-purple); }
+.card-body { padding: 16px 18px; display: flex; flex-direction: column; flex-grow: 1; text-align: center; }
+.card-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-main); }
+.card-author { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; }
+.tags { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; justify-content: center; }
+.tag { background: var(--bg-tag); padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 700; color: var(--text-tag); text-transform: uppercase; letter-spacing: 0.4px; }
+.card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 14px; border-top: 1px solid var(--border-color); gap: 8px; }
+.card-footer-actions { display: flex; align-items: center; gap: 4px; }
+.likes { display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; padding: 4px 6px; border-radius: 6px; transition: all 0.15s; }
+.likes:hover { background: var(--bg-hover); }
+.likes svg { width: 15px; height: 15px; fill: currentColor; }
+.likes.liked { color: var(--danger); }
+.use-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: #000000; color: #ffffff; border: none; padding: 8px 16px; border-radius: 9999px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s ease; line-height: 1; white-space: nowrap; font-family: inherit; }
+.use-btn:hover { background: #1F2937; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18); }
+.use-btn:active { transform: translateY(0); }
+.use-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+/* IMPORTAR MODELO */
+.import-page { max-width: 820px; margin: 0 auto; }
+.import-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; box-shadow: var(--shadow-sm); overflow: hidden; }
+.import-section { padding: 28px 32px; border-bottom: 1px solid var(--border-color); }
+.import-section:last-of-type { border-bottom: none; }
+.import-section-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text-subtle); margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+.import-section-title::before { content: ''; width: 3px; height: 14px; background: var(--accent-purple); border-radius: 2px; }
+.import-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+.import-grid-2:last-child { margin-bottom: 0; }
+.import-field { display: flex; flex-direction: column; gap: 8px; }
+.import-field.full { grid-column: 1 / -1; }
+.import-field label { font-size: 13px; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 4px; }
+.import-field label .required { color: var(--danger); font-size: 14px; }
+.import-field input[type="text"], .import-field input[type="url"], .import-field select { width: 100%; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px 14px; color: var(--text-main); font-size: 14px; outline: none; transition: all 0.15s ease; font-family: inherit; font-weight: 500; }
+.import-field input:focus, .import-field select:focus { border-color: var(--accent-purple); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); background: #FFFFFF; }
+.import-field input::placeholder { color: var(--text-subtle); }
+.import-field select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%236B7280'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+.cover-upload-row { display: flex; align-items: center; gap: 20px; }
+.cover-preview { width: 90px; height: 90px; border-radius: 16px; background: var(--bg-main); border: 2px dashed #D1D5DB; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; transition: all 0.2s; cursor: pointer; }
+.cover-preview:hover { border-color: var(--accent-purple); background: var(--accent-purple-light); }
+.cover-preview svg { width: 32px; height: 32px; fill: var(--text-subtle); transition: all 0.2s; }
+.cover-preview:hover svg { fill: var(--accent-purple); }
+.cover-preview img { width: 100%; height: 100%; object-fit: cover; }
+.cover-info { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+.cover-info p { font-size: 13px; color: var(--text-muted); margin: 0; }
+.btn-choose-cover { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 18px; background: transparent; border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-main); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: inherit; width: fit-content; }
+.btn-choose-cover:hover { background: var(--bg-hover); border-color: var(--accent-purple); color: var(--accent-purple); }
+.btn-choose-cover svg { width: 15px; height: 15px; fill: currentColor; }
+.import-tabs { display: flex; gap: 6px; margin-bottom: 18px; padding: 4px; background: var(--bg-input); border-radius: 9999px; width: fit-content; border: 1px solid var(--border-color); }
+.import-tab { display: inline-flex; align-items: center; gap: 8px; padding: 9px 20px; border-radius: 9999px; background: transparent; border: none; font-size: 13px; font-weight: 600; color: var(--text-sidebar); cursor: pointer; transition: all 0.15s; font-family: inherit; white-space: nowrap; }
+.import-tab svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.import-tab:hover { color: var(--text-main); }
+.import-tab.active { background: var(--accent); color: var(--accent-text); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); }
+.import-tab-content { display: none; }
+.import-tab-content.active { display: block; animation: fadeIn 0.25s; }
+.import-hint { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: var(--accent-purple-light); border: 1px solid #DDD6FE; border-radius: 10px; font-size: 12px; color: var(--accent-purple-tag-text); margin-top: 10px; }
+.import-hint svg { width: 14px; height: 14px; fill: currentColor; flex-shrink: 0; }
+.file-drop-zone { border: 2px dashed #D1D5DB; border-radius: 14px; padding: 36px 24px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--bg-main); display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.file-drop-zone:hover, .file-drop-zone.dragover { border-color: var(--accent-purple); background: var(--accent-purple-light); }
+.file-drop-zone svg { width: 40px; height: 40px; fill: var(--text-subtle); transition: all 0.2s; }
+.file-drop-zone:hover svg, .file-drop-zone.dragover svg { fill: var(--accent-purple); transform: scale(1.05); }
+.file-drop-zone p { font-size: 14px; font-weight: 700; color: var(--text-main); }
+.file-drop-zone span { font-size: 12px; color: var(--text-muted); }
+.file-drop-formats { display: flex; gap: 6px; margin-top: 4px; }
+.file-format-badge { background: var(--bg-tag); padding: 3px 10px; border-radius: 6px; font-size: 10px; font-weight: 800; color: var(--text-tag); letter-spacing: 0.4px; }
+.import-footer { padding: 20px 32px; background: var(--bg-main); border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.import-cancel { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); padding: 11px 22px; border-radius: 9999px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: inherit; }
+.import-cancel:hover { background: var(--bg-hover); }
+.btn-publish-model { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #000000; color: #FFFFFF; border: none; padding: 12px 26px; border-radius: 9999px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.15s; font-family: inherit; }
+.btn-publish-model:hover { background: #1F2937; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18); }
+.btn-publish-model:active { transform: translateY(0); }
+.btn-publish-model svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* MODAL CRIAR COVER */
+.cover-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(17, 24, 39, 0.55); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 5000; padding: 20px; }
+.cover-modal-overlay.active { display: flex; animation: coverFadeIn 0.2s; }
+@keyframes coverFadeIn { from { opacity: 0; } to { opacity: 1; } }
+.cover-modal { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; width: 100%; max-width: 720px; max-height: 92vh; display: flex; flex-direction: column; box-shadow: var(--shadow-xl); animation: coverSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden; }
+@keyframes coverSlideUp { from { opacity: 0; transform: translateY(20px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.cover-modal-header { padding: 24px 32px 20px; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
+.cover-modal-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 24px; }
+.cover-modal-title { font-size: 22px; font-weight: 800; letter-spacing: -0.4px; color: var(--text-main); margin-bottom: 4px; }
+.cover-modal-subtitle { font-size: 14px; color: var(--text-muted); }
+.cover-modal-close { width: 36px; height: 36px; border-radius: 10px; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); transition: all 0.15s; flex-shrink: 0; }
+.cover-modal-close:hover { background: var(--bg-hover); color: var(--text-main); }
+.cover-modal-close svg { width: 18px; height: 18px; fill: currentColor; }
+.cover-stepper { display: flex; align-items: center; gap: 0; }
+.cover-step { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.cover-step-circle { width: 30px; height: 30px; border-radius: 50%; background: var(--bg-input); border: 2px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: var(--text-muted); transition: all 0.25s; flex-shrink: 0; }
+.cover-step.completed .cover-step-circle { background: var(--success); border-color: var(--success); color: #FFFFFF; }
+.cover-step.completed .cover-step-circle svg { width: 14px; height: 14px; fill: none; stroke: #FFFFFF; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.cover-step.active .cover-step-circle { background: var(--accent-purple); border-color: var(--accent-purple); color: #FFFFFF; box-shadow: 0 0 0 5px rgba(124, 58, 237, 0.12); }
+.cover-step-label { font-size: 13px; font-weight: 700; color: var(--text-muted); }
+.cover-step.active .cover-step-label, .cover-step.completed .cover-step-label { color: var(--text-main); }
+.cover-step-connector { flex: 1; height: 2px; background: var(--border-color); margin: 0 14px; border-radius: 2px; }
+.cover-step-connector.completed { background: var(--success); }
+.cover-modal-body { padding: 24px 32px; overflow-y: auto; flex: 1; position: relative; }
+.cover-audio-tabs { display: flex; gap: 8px; margin-bottom: 24px; padding: 4px; background: var(--bg-input); border-radius: 9999px; width: fit-content; border: 1px solid var(--border-color); }
+.cover-audio-tab { padding: 8px 20px; border-radius: 9999px; background: transparent; border: none; font-size: 13px; font-weight: 600; color: var(--text-sidebar); cursor: pointer; transition: all 0.15s; font-family: inherit; white-space: nowrap; }
+.cover-audio-tab:hover { color: var(--text-main); }
+.cover-audio-tab.active { background: var(--accent); color: var(--accent-text); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); }
+.cover-panel { display: none; }
+.cover-panel.active { display: block; animation: coverFadeIn 0.25s; }
+.cover-section { margin-bottom: 22px; }
+.cover-section-title { font-size: 11px; font-weight: 700; color: var(--text-subtle); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
+.recent-audios { display: flex; flex-direction: column; gap: 6px; max-height: 180px; overflow-y: auto; }
+.recent-audio-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; cursor: pointer; transition: all 0.15s; }
+.recent-audio-item:hover { border-color: var(--accent-purple); background: var(--accent-purple-light); }
+.recent-audio-item.selected { border-color: var(--accent-purple); background: var(--accent-purple-light); }
+.recent-audio-icon { width: 34px; height: 34px; border-radius: 8px; background: var(--bg-card); display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid var(--border-color); }
+.recent-audio-icon svg { width: 16px; height: 16px; fill: var(--accent-purple); }
+.recent-audio-info { flex: 1; min-width: 0; }
+.recent-audio-name { font-size: 13px; font-weight: 600; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.recent-audio-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.recent-audio-play { width: 28px; height: 28px; border-radius: 50%; background: transparent; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); transition: all 0.15s; flex-shrink: 0; }
+.recent-audio-play:hover { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+.recent-audio-play svg { width: 12px; height: 12px; fill: currentColor; }
+
+/* YOUTUBE INPUT */
+.youtube-input-wrapper { display: flex; gap: 8px; align-items: center; transition: opacity 0.2s ease; }
+.youtube-input-wrapper.hidden { display: none; }
+.youtube-input-box { flex: 1; display: flex; align-items: center; gap: 10px; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px 14px; transition: all 0.15s; }
+.youtube-input-box:focus-within { border-color: var(--accent-purple); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
+.youtube-input-box.error { border-color: var(--danger); box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1); }
+.youtube-input-box svg.youtube-icon { width: 20px; height: 20px; fill: var(--youtube-red); flex-shrink: 0; }
+.youtube-input-box input { flex: 1; border: none; background: transparent; outline: none; font-size: 14px; color: var(--text-main); font-family: inherit; min-width: 0; }
+.youtube-input-box input::placeholder { color: var(--text-subtle); }
+.btn-paste-url { background: var(--accent); color: var(--accent-text); border: none; border-radius: 9999px; padding: 10px 18px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: inherit; white-space: nowrap; }
+.btn-paste-url:hover { background: #1F2937; transform: translateY(-1px); }
+.btn-paste-url.loading { pointer-events: none; opacity: 0.7; }
+.btn-paste-url .btn-spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #FFFFFF; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; vertical-align: middle; margin-right: 6px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.youtube-loading { display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 30px 20px; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 12px; margin-top: 12px; }
+.youtube-loading.active { display: flex; }
+.youtube-loading-spinner { width: 32px; height: 32px; border: 3px solid var(--border-color); border-top-color: var(--youtube-red); border-radius: 50%; animation: spin 0.8s linear infinite; }
+.youtube-loading span { font-size: 13px; color: var(--text-muted); font-weight: 600; }
+
+.youtube-error { display: none; align-items: center; gap: 10px; padding: 12px 16px; background: #FEF2F2; border: 1px solid #FECACA; border-radius: 10px; font-size: 13px; color: var(--danger); font-weight: 600; margin-top: 12px; }
+.youtube-error.active { display: flex; }
+.youtube-error svg { width: 16px; height: 16px; fill: currentColor; flex-shrink: 0; }
+
+.youtube-confirmation { display: none; align-items: center; gap: 14px; padding: 14px; background: var(--bg-main); border: 1px solid var(--success); border-radius: 12px; margin-top: 12px; animation: coverFadeIn 0.3s; }
+.youtube-confirmation.active { display: flex; }
+.youtube-thumb { width: 90px; height: 66px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: var(--bg-input); }
+.youtube-confirm-info { flex: 1; min-width: 0; }
+.youtube-confirm-title { font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 4px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.youtube-confirm-meta { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; font-weight: 600; }
+.youtube-confirm-meta svg { width: 12px; height: 12px; fill: var(--youtube-red); }
+.youtube-check-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--success); border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #FFFFFF; flex-shrink: 0; transition: all 0.2s; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
+.youtube-check-btn:hover { transform: scale(1.1); background: #059669; }
+.youtube-check-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.youtube-remove-btn { width: 28px; height: 28px; border-radius: 50%; background: transparent; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); flex-shrink: 0; transition: all 0.15s; }
+.youtube-remove-btn:hover { background: #FEF2F2; border-color: #FECACA; color: var(--danger); }
+.youtube-remove-btn svg { width: 12px; height: 12px; fill: currentColor; }
+
+.cover-divider { display: flex; align-items: center; gap: 14px; margin: 20px 0; color: var(--text-subtle); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+.cover-divider::before, .cover-divider::after { content: ''; flex: 1; height: 1px; background: var(--border-color); }
+.cover-upload-zone { border: 2px dashed #D1D5DB; border-radius: 14px; padding: 36px 24px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--bg-main); display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.cover-upload-zone:hover, .cover-upload-zone.dragover { border-color: var(--accent-purple); background: var(--accent-purple-light); }
+.cover-upload-zone svg { width: 40px; height: 40px; fill: var(--text-subtle); transition: all 0.2s; }
+.cover-upload-zone:hover svg, .cover-upload-zone.dragover svg { fill: var(--accent-purple); transform: scale(1.05); }
+.cover-upload-zone p { font-size: 14px; font-weight: 600; color: var(--text-main); }
+.cover-upload-zone span { font-size: 12px; color: var(--text-muted); }
+.cover-upload-formats { display: flex; gap: 6px; margin-top: 4px; }
+.cover-format-badge { background: var(--bg-tag); padding: 3px 10px; border-radius: 6px; font-size: 10px; font-weight: 800; color: var(--text-tag); letter-spacing: 0.4px; }
+.tts-textarea { width: 100%; min-height: 140px; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px 16px; color: var(--text-main); font-size: 14px; outline: none; resize: vertical; font-family: inherit; line-height: 1.6; transition: all 0.15s; }
+.tts-textarea:focus { border-color: var(--accent-purple); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
+.tts-textarea::placeholder { color: var(--text-subtle); }
+.tts-char-counter { font-size: 12px; color: var(--text-muted); font-weight: 600; text-align: right; margin-top: 8px; }
+.record-container { display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 32px 20px; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 14px; }
+.record-circle { width: 90px; height: 90px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-purple), #C084FC); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.25s; box-shadow: 0 8px 25px rgba(124, 58, 237, 0.35); border: none; }
+.record-circle:hover { transform: scale(1.05); }
+.record-circle.recording { background: linear-gradient(135deg, #EF4444, #DC2626); }
+.record-circle svg { width: 36px; height: 36px; fill: #FFFFFF; }
+.record-timer { font-size: 28px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--text-main); letter-spacing: -0.5px; }
+.record-hint { font-size: 13px; color: var(--text-muted); text-align: center; }
+
+/* BOTÃO AVANÇAR — Estados bem definidos */
+.cover-modal-footer { padding: 18px 32px; background: var(--bg-main); border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-shrink: 0; }
+.cover-footer-left { display: flex; gap: 10px; }
+.btn-cover-cancel { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); padding: 11px 22px; border-radius: 9999px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: inherit; }
+.btn-cover-cancel:hover { background: var(--bg-hover); }
+.btn-cover-secondary { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); padding: 11px 22px; border-radius: 9999px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 6px; font-family: inherit; }
+.btn-cover-secondary:hover:not(:disabled) { background: var(--bg-hover); }
+.btn-cover-secondary:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-cover-secondary svg { width: 14px; height: 14px; fill: currentColor; }
+
+.btn-cover-next {
+    background: #000000;
+    color: #FFFFFF;
+    border: none;
+    padding: 11px 26px;
+    border-radius: 9999px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: inherit;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+.btn-cover-next:not(:disabled):hover {
+    background: #1F2937;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
+}
+.btn-cover-next:not(:disabled):active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+.btn-cover-next:disabled {
+    background: #E5E7EB;
+    color: #9CA3AF;
+    cursor: not-allowed;
+    box-shadow: none;
+    opacity: 1;
+}
+.btn-cover-next svg { width: 14px; height: 14px; fill: currentColor; }
+.btn-cover-next .btn-spinner {
+    width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: #FFFFFF;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: inline-block;
+}
+
+/* GENERATING OVERLAY (durante transição ao Step 3) */
+.generating-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(4px);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    z-index: 100;
+    border-radius: 0 0 20px 20px;
+}
+.generating-overlay.active { display: flex; }
+.generating-spinner {
+    width: 44px;
+    height: 44px;
+    border: 4px solid var(--border-color);
+    border-top-color: var(--accent-purple);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+}
+.generating-overlay h3 {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-main);
+}
+.generating-overlay p {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+/* MODAL ALTERAR FOTO */
+.change-photo-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(17, 24, 39, 0.55); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 6000; padding: 20px; }
+.change-photo-overlay.active { display: flex; animation: coverFadeIn 0.2s; }
+.change-photo-modal { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; width: 100%; max-width: 440px; padding: 32px; box-shadow: var(--shadow-xl); animation: coverSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+.change-photo-modal h2 { font-size: 20px; font-weight: 800; margin-bottom: 6px; text-align: center; color: var(--text-main); }
+.change-photo-modal .subtitle { color: var(--text-muted); font-size: 13px; text-align: center; margin-bottom: 24px; }
+.current-photo-preview { display: flex; justify-content: center; margin-bottom: 24px; }
+.current-photo-preview img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid transparent; background: linear-gradient(#FFFFFF, #FFFFFF) padding-box, linear-gradient(135deg, #7C3AED, #C084FC) border-box; box-shadow: 0 8px 25px rgba(124, 58, 237, 0.2); }
+.photo-method { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+.photo-method label { font-size: 12px; font-weight: 700; color: var(--text-subtle); text-transform: uppercase; letter-spacing: 0.5px; }
+.photo-method input[type="url"] { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px 16px; color: var(--text-main); font-size: 14px; outline: none; transition: all 0.15s; width: 100%; font-family: inherit; }
+.photo-method input[type="url"]:focus { border-color: var(--accent-purple); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
+.photo-divider { display: flex; align-items: center; gap: 12px; color: var(--text-subtle); font-size: 11px; font-weight: 700; text-transform: uppercase; margin: 4px 0; }
+.photo-divider::before, .photo-divider::after { content: ''; flex: 1; height: 1px; background: var(--border-color); }
+.btn-file-upload { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px; background: var(--bg-main); border: 1px dashed #D1D5DB; border-radius: 10px; color: var(--text-main); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; width: 100%; font-family: inherit; }
+.btn-file-upload:hover { background: var(--bg-hover); border-color: var(--accent-purple); color: var(--accent-purple); }
+.btn-file-upload svg { width: 16px; height: 16px; fill: currentColor; }
+.photo-actions { display: flex; gap: 12px; margin-top: 8px; }
+.photo-actions button { flex: 1; }
+.btn-photo-cancel { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: inherit; }
+.btn-photo-cancel:hover { background: var(--bg-hover); }
+.btn-photo-save { background: var(--accent-purple); color: #FFFFFF; border: none; padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: inherit; }
+.btn-photo-save:hover { background: var(--accent-purple-hover); transform: translateY(-1px); }
+
+@media (max-width: 700px) {
+    .cover-modal-header, .cover-modal-body, .cover-modal-footer { padding-left: 20px; padding-right: 20px; }
+    .cover-modal-title { font-size: 19px; }
+    .cover-step-label { display: none; }
+    .cover-step-connector { margin: 0 8px; }
+    .import-grid-2 { grid-template-columns: 1fr; }
+    .import-section { padding: 20px; }
+    .import-footer { padding: 16px 20px; }
+}
+
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+.toast-notif { position: fixed; bottom: 24px; right: 24px; background: #111827; color: #fff; padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); z-index: 9999; opacity: 0; transform: translateY(20px); transition: all 0.3s; }
+.toast-notif.active { opacity: 1; transform: translateY(0); }
+.toast-notif.success { background: #10B981; }
+.toast-notif.danger { background: #EF4444; }
+
+/* POLIMENTO: CURTIDAS, USOS, MODAIS E TEMA ESCURO */
+.likes { cursor: pointer; border: 0; background: transparent; font: inherit; }
+.likes svg { transition: transform 0.18s ease, color 0.18s ease; }
+.likes:hover svg { transform: scale(1.12); }
+.likes:focus-visible { outline: 2px solid var(--accent-purple); outline-offset: 2px; }
+.likes.liked { color: #EF4444; }
+.likes.liked svg { fill: #EF4444; }
+.model-usage { display: inline-flex; align-items: center; gap: 5px; color: var(--text-subtle); font-size: 11px; font-weight: 600; }
+.model-usage svg { width: 14px; height: 14px; fill: currentColor; }
+.model-meta { display: flex; justify-content: space-between; align-items: center; min-height: 20px; margin-bottom: 12px; }
+.empty-models { grid-column: 1 / -1; padding: 48px 20px; border: 1px dashed var(--border-color); border-radius: 16px; color: var(--text-muted); text-align: center; }
+.card .tags { margin-bottom: 14px; }
+.social-login-overlay, .import-modal-overlay { position: fixed; inset: 0; z-index: 7000; display: none; align-items: center; justify-content: center; padding: 20px; background: var(--overlay); backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px); }
+.social-login-overlay.active, .import-modal-overlay.active { display: flex; animation: coverFadeIn 0.2s ease; }
+.social-login-modal, .import-modal { width: min(100%, 540px); max-height: min(90vh, 780px); overflow-y: auto; padding: 30px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 22px; box-shadow: var(--shadow-xl); animation: coverSlideUp 0.25s ease; }
+.social-login-modal { position: relative; width: min(100%, 420px); text-align: center; }
+.social-login-modal > .modal-close { position: absolute; top: 18px; right: 18px; }
+.modal-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 24px; }
+.modal-heading h2, .social-login-modal h2 { color: var(--text-main); font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+.modal-heading p, .social-login-modal > p { margin-top: 6px; color: var(--text-muted); font-size: 13px; line-height: 1.5; }
+.modal-close { width: 34px; height: 34px; flex: 0 0 34px; display: grid; place-items: center; border: 1px solid var(--border-color); border-radius: 50%; background: var(--bg-card); color: var(--text-muted); cursor: pointer; }
+.modal-close:hover { background: var(--bg-hover); color: var(--text-main); }
+.modal-close svg { width: 17px; height: 17px; fill: currentColor; }
+.import-modal-form { display: grid; gap: 18px; }
+.modal-field { display: grid; gap: 8px; }
+.modal-field label { color: var(--text-main); font-size: 13px; font-weight: 700; }
+.modal-field label span { color: var(--danger); }
+.modal-field input, .modal-field select { width: 100%; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 11px; outline: none; background: var(--bg-main); color: var(--text-main); font: inherit; transition: border-color 0.15s, box-shadow 0.15s; }
+.modal-field input:focus, .modal-field select:focus { border-color: var(--accent-purple); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12); }
+.modal-field small { color: var(--text-muted); font-size: 11px; line-height: 1.45; }
+.import-cover-drop { min-height: 138px; display: flex; align-items: center; justify-content: center; gap: 14px; padding: 18px; border: 1.5px dashed var(--border-color); border-radius: 14px; background: var(--bg-main); color: var(--text-muted); cursor: pointer; transition: all 0.18s; }
+.import-cover-drop:hover, .import-cover-drop.dragover { border-color: var(--accent-purple); background: var(--accent-purple-light); }
+.import-cover-drop svg { width: 30px; height: 30px; flex-shrink: 0; fill: var(--accent-purple); }
+.import-cover-drop-copy { display: grid; gap: 4px; }
+.import-cover-drop-copy strong { color: var(--text-main); font-size: 13px; }
+.import-cover-drop-copy span { font-size: 11px; }
+.import-cover-drop img { width: 72px; height: 72px; object-fit: cover; border-radius: 12px; }
+.import-modal-actions { display: flex; justify-content: flex-end; gap: 10px; padding-top: 4px; }
+.import-modal-actions .import-cancel { padding: 11px 18px; }
+.social-login-mark { width: 58px; height: 58px; display: grid; place-items: center; margin: 0 auto 16px; border-radius: 18px; background: var(--accent-purple-light); color: var(--accent-purple); font-size: 24px; font-weight: 900; }
+.social-login-buttons { display: grid; gap: 12px; margin: 26px 0 16px; }
+.social-login-button { min-height: 48px; display: flex; align-items: center; justify-content: center; gap: 11px; border-radius: 11px; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; }
+.social-login-button:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.social-login-button svg { width: 19px; height: 19px; }
+.social-login-button.discord { border: 1px solid #5865F2; background: #5865F2; color: #fff; }
+.social-login-button.google { border: 1px solid var(--border-color); background: #fff; color: #202124; }
+.login-disclaimer { display: block; color: var(--text-subtle); font-size: 11px; line-height: 1.5; }
+.theme-option { color: var(--text-main); }
+.theme-option svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; }
+body.dark-mode {
+    --bg-main: #111318; --bg-sidebar: #17191F; --bg-card: #1C1F27;
+    --bg-input: #242832; --bg-hover: #272B35; --bg-tag: #242832; --bg-tag-hover: #303541;
+    --border-color: #303540; --border-light: #292D36; --text-main: #F3F4F6;
+    --text-muted: #A1A7B3; --text-subtle: #858C9A; --text-sidebar: #C0C5CF;
+    --text-tag: #E5E7EB; --accent: #F3F4F6; --accent-text: #111318;
+    --accent-purple-light: #302544; --accent-purple-tag: #38264C; --accent-purple-tag-text: #D8B4FE;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,.24); --shadow-md: 0 8px 22px rgba(0,0,0,.28);
+    --shadow-lg: 0 12px 32px rgba(0,0,0,.35); --shadow-xl: 0 20px 45px rgba(0,0,0,.45);
+    --shadow-dropdown: 0 10px 25px rgba(0,0,0,.35); --overlay: rgba(0,0,0,.68);
+    --card-cover-bg: linear-gradient(180deg, #20232B 0%, #17191F 100%);
+}
+body.dark-mode .dropdown-menu { background: var(--bg-card); }
+body.dark-mode .user-profile-block { background: var(--bg-main); border-color: var(--border-color); }
+body.dark-mode .avatar-camera-btn { border-color: var(--bg-card); }
+body.dark-mode .card-avatar { border-color: var(--bg-card); }
+body.dark-mode .btn-primary:hover, body.dark-mode .btn-paste-url:hover { background: #D1D5DB; color: #111318; }
+body.dark-mode .social-login-button.google { background: #fff; color: #202124; }
+body.dark-mode .youtube-error { background: #351D22; border-color: #633039; }
+body.dark-mode .youtube-remove-btn:hover { background: #351D22; border-color: #633039; }
+body.dark-mode .cover-upload-zone[style*="rgb(16, 185, 129)"] { background: #173328 !important; }
+@media (max-width: 700px) {
+    .social-login-modal, .import-modal { padding: 24px 20px; }
+    .import-modal-actions { flex-direction: column-reverse; }
+    .import-modal-actions button { width: 100%; justify-content: center; }
+    .header-right .btn-primary { padding: 10px 13px; }
+    .header-right .btn-primary span { display: none; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+}
+</style>
 </head>
 <body>
 
-    <!-- CABEÇALHO SUPERIOR CONSERTADO -->
+<!-- SIDEBAR -->
+<aside class="sidebar">
+    <div class="logo">Weights<span>Revival</span></div>
+    <div class="nav-group">
+        <button class="nav-item active" data-target="voice-models">
+            <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+            <span>Voice Models</span>
+        </button>
+        <button class="nav-item" data-target="inicio">
+            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            <span>Início</span>
+        </button>
+        <button class="nav-item" data-target="importar">
+            <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            <span>Importar Modelo</span>
+        </button>
+        <button class="nav-item" data-target="favoritos">
+            <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            <span>Favoritos</span>
+        </button>
+        <button class="nav-item" data-target="colecoes">
+            <svg viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg>
+            <span>Coleções</span>
+        </button>
+    </div>
+    <div class="nav-group">
+        <div class="section-title">CRIAÇÃO RÁPIDA</div>
+        <button class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+            <span>Cover de Voz</span>
+        </button>
+        <button class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+            <span>Treinar Voz</span>
+        </button>
+        <button class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+            <span>Imagem</span>
+        </button>
+        <button class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/></svg>
+            <span>Chat de Personagem</span>
+        </button>
+    </div>
+</aside>
+
+<!-- ÁREA PRINCIPAL -->
+<div class="main-wrapper">
     <header class="top-header">
-        <!-- Bloco 1: Logo na extrema esquerda -->
-        <div class="header-left">
-            <div class="logo">Weights<span>Revival</span></div>
-        </div>
-        
-        <!-- Bloco 2: Barra de Pesquisa centralizada -->
+        <div class="header-left"></div>
         <div class="header-center">
             <div class="search-bar">
-                <svg class="search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-                <input type="text" placeholder="Buscar vozes, criadores e tags...">
+                <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                <input type="search" id="model-search" placeholder="Buscar vozes, criadores e tags..." autocomplete="off">
             </div>
         </div>
-
-        <!-- Bloco 3: Botões e Avatar na ponta direita -->
         <div class="header-right">
-            <button class="btn-import">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
-                Importar Modelo
+            <button class="btn-primary" onclick="openImportModal()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="12" y1="18" x2="12" y2="12"></line>
+                    <line x1="9" y1="15" x2="15" y2="15"></line>
+                </svg>
+                <span>Importar Modelo</span>
             </button>
-            <button class="btn-icon">
-                <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
-            </button>
-            <!-- Avatar original mantido intacto -->
-            <img src="https://i.pravatar.cc/150?img=68" alt="User Avatar" class="avatar">
+
+            <div class="settings-dropdown-container">
+                <button class="btn-icon" id="settings-btn" title="Configurações">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </button>
+                <div class="settings-dropdown" id="settings-dropdown">
+                    <div class="settings-header"><span>Aparência</span></div>
+                    <button class="settings-option theme-option" id="theme-toggle" type="button" onclick="toggleTheme()">
+                        <svg viewBox="0 0 24 24" id="theme-icon"><path d="M12 3a6 6 0 0 0 9 5.2A9 9 0 1 1 15.8 3 6 6 0 0 0 12 3z"/></svg>
+                        <span class="lang-name" id="theme-label">Modo escuro</span>
+                    </button>
+                    <div class="settings-divider"></div>
+                    <div class="settings-header">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                        <span>Idioma</span>
+                    </div>
+                    <div class="settings-divider"></div>
+                    <button class="settings-option active" data-lang="pt" onclick="setLanguage('pt')"><span class="flag">🇧🇷</span><span class="lang-name">Português</span><span class="lang-code">PT</span><svg class="check-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></button>
+                    <button class="settings-option" data-lang="en" onclick="setLanguage('en')"><span class="flag">🇺🇸</span><span class="lang-name">English</span><span class="lang-code">EN</span><svg class="check-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></button>
+                    <button class="settings-option" data-lang="es" onclick="setLanguage('es')"><span class="flag">🇪🇸</span><span class="lang-name">Español</span><span class="lang-code">ES</span><svg class="check-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></button>
+                </div>
+            </div>
+
+            <div class="profile-logged-in" id="profile-logged-in">
+                <img src="https://i.pravatar.cc/150?img=68" alt="User Avatar" class="avatar" id="user-avatar">
+                <div class="dropdown-menu" id="profile-dropdown">
+                    <div class="dropdown-inner-header">Sua Conta</div>
+                    <div class="user-profile-block">
+                        <div class="user-avatar-wrapper">
+                            <img src="https://i.pravatar.cc/150?img=68" alt="User" class="user-avatar-large" id="dropdown-avatar">
+                            <button class="avatar-camera-btn" id="btn-change-photo" title="Alterar foto">
+                                <svg viewBox="0 0 24 24"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+                            </button>
+                        </div>
+                        <div class="user-details">
+                            <span class="user-name" id="user-name">lucasgamer469</span>
+                            <span class="user-role-badge">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                                <span id="user-status">Logado</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-action" type="button" onclick="openLoginModal()">
+                        <svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0 2c-4.42 0-8 2.24-8 5v3h16v-3c0-2.76-3.58-5-8-5z"/></svg>
+                        Entrar ou trocar conta
+                    </button>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-action" onclick="alert('Redirecionando para o perfil...')">
+                        <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                        Meu Perfil
+                    </button>
+                    <button class="dropdown-action danger" onclick="handleLogout()">
+                        <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+                        Sair da Conta
+                    </button>
+                </div>
+            </div>
+            <button class="btn-primary" id="login-button" type="button" onclick="openLoginModal()" hidden>Entrar</button>
         </div>
     </header>
 
-    <!-- CONTAINER DE BAIXO -->
-    <div class="main-layout">
-        
-        <!-- SIDEBAR -->
-        <aside class="sidebar">
-            <div class="nav-group">
-                <button class="nav-item active" data-target="voice-models">
-                    <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
-                    Voice Models
-                </button>
-                <button class="nav-item" data-target="inicio">
-                    <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-                    Início
-                </button>
-                <button class="nav-item" data-target="importar">
-                    <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-                    Importar Modelo
-                </button>
-                <button class="nav-item" data-target="minhas-criacoes">
-                    <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-                    Minhas Criações
-                </button>
-                <button class="nav-item">
-                    <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                    Favoritos
-                </button>
-                <button class="nav-item">
-                    <svg viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg>
-                    Coleções
-                </button>
+    <main class="content-area">
+        <div id="voice-models" class="tab-pane active">
+            <div class="page-header">
+                <h1>Voice Models</h1>
+                <p>Descubra e use vozes de IA para seus covers</p>
             </div>
-
-            <div class="nav-group">
-                <div class="section-title">CRIAÇÃO RÁPIDA</div>
-                <button class="nav-item">
-                    <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
-                    Cover de Voz
-                </button>
-                <button class="nav-item">
-                    <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-                    Treinar Voz
-                </button>
-                <button class="nav-item">
-                    <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-                    Imagem
-                </button>
-                <button class="nav-item">
-                    <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/></svg>
-                    Chat de Personagem
-                </button>
+            <div class="filters">
+                <button class="filter-btn active" data-filter="all">Todos</button>
+                <button class="filter-btn" data-filter="popular">Populares</button>
+                <button class="filter-btn" data-filter="recent">Recentes</button>
+                <button class="filter-btn" data-filter="masculino">Masculino</button>
+                <button class="filter-btn" data-filter="feminino">Feminino</button>
+                <button class="filter-btn" data-filter="anime">Anime</button>
+                <button class="filter-btn" data-filter="games">Jogos</button>
+                <button class="filter-btn" data-filter="cartoon">Desenho</button>
             </div>
-        </aside>
+            <div class="grid" id="models-grid"></div>
+        </div>
 
-        <!-- ÁREA DE CONTEÚDO -->
-        <main class="content-area">
-            
-            <!-- Início Tab -->
-            <div id="inicio" class="tab-content">
-                <div class="header-section">
-                    <h1>Início</h1>
-                    <p>Bem-vindo ao Weights Revival. Explore, crie e compartilhe modelos de voz.</p>
-                </div>
-                <div class="empty-state">
-                    <p>Em breve: Estatísticas e novidades da plataforma.</p>
-                </div>
-            </div>
+        <div id="inicio" class="tab-pane">
+            <div class="page-header"><h1>Início</h1><p>Bem-vindo ao Weights Revival</p></div>
+            <div style="text-align:center;padding:80px 0;color:var(--text-muted)"><h3>Nenhuma atividade recente</h3></div>
+        </div>
 
-            <!-- Voice Models Tab -->
-            <div id="voice-models" class="tab-content active">
-                <div class="header-section">
-                    <h1>Voice Models</h1>
-                    <p>Descubra vozes de IA para seu próximo cover</p>
+        <div id="importar" class="tab-pane">
+            <div class="import-page">
+                <div class="page-header">
+                    <h1>Importar Modelo</h1>
+                    <p>Adicione um novo modelo RVC à plataforma.</p>
                 </div>
-
-                <div class="filters">
-                    <button class="filter-btn active">Todos</button>
-                    <button class="filter-btn">Populares</button>
-                    <button class="filter-btn">Adicionados Recentemente</button>
-                    <button class="filter-btn">Masculino</button>
-                    <button class="filter-btn">Feminino</button>
-                    <button class="filter-btn">Anime</button>
-                    <button class="filter-btn">Jogos</button>
-                    <button class="filter-btn">Desenho</button>
-                    <button class="filter-btn">Português</button>
-                </div>
-
-                <div class="grid">
-                    <div class="card">
-                        <div class="card-img-container">
-                            <!-- Imagem original do Darwin mantida intacta -->
-                            <img src="https://upload.wikimedia.org/wikipedia/en/3/3b/Darwin_Watterson.png" alt="Darwin Watterson" class="card-img">
-                            <div class="play-btn">
-                                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <div class="import-card">
+                    <div class="import-section">
+                        <div class="import-section-title">Informações Básicas</div>
+                        <div class="import-grid-2">
+                            <div class="import-field">
+                                <label>Nome do Modelo <span class="required">*</span></label>
+                                <input type="text" id="import-name" placeholder="Ex: Darwin Watterson">
+                            </div>
+                            <div class="import-field">
+                                <label>Criador (@) <span class="required">*</span></label>
+                                <input type="text" id="import-creator" placeholder="@seu_usuario">
                             </div>
                         </div>
-                        <h3 class="card-title">darwin watterson pt br</h3>
-                        <p class="card-author">por Neon_producer</p>
-                        <div class="tags">
-                            <span class="tag">custom</span>
-                            <span class="tag">RVC</span>
-                            <span class="tag">cartoon</span>
-                            <span class="tag">pt-br</span>
-                        </div>
-                        <div class="card-footer">
-                            <div class="likes">
-                                <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                                0
+                        <div class="import-grid-2">
+                            <div class="import-field">
+                                <label>Categoria</label>
+                                <select id="import-category">
+                                    <option value="">Selecionar categoria...</option>
+                                    <option value="anime">Anime</option>
+                                    <option value="games">Jogos</option>
+                                    <option value="cartoon">Desenho</option>
+                                    <option value="musicians">Músicos</option>
+                                    <option value="movies">Filmes</option>
+                                    <option value="memes">Memes</option>
+                                    <option value="others">Outros</option>
+                                </select>
                             </div>
-                            <button class="use-btn">
-                                Usar
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                            <div class="import-field">
+                                <label>Idioma</label>
+                                <select id="import-language">
+                                    <option value="">Selecionar idioma...</option>
+                                    <option value="pt-br">Português (PT-BR)</option>
+                                    <option value="en">Inglês (EN)</option>
+                                    <option value="jp">Japonês (JP)</option>
+                                    <option value="es">Espanhol (ES)</option>
+                                    <option value="fr">Francês (FR)</option>
+                                    <option value="de">Alemão (DE)</option>
+                                    <option value="multi">Multi-idioma</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="import-section">
+                        <div class="import-section-title">Capa do Modelo</div>
+                        <div class="cover-upload-row">
+                            <div class="cover-preview" id="cover-preview">
+                                <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+                            </div>
+                            <div class="cover-info">
+                                <p>Escolha uma imagem quadrada que represente seu modelo.</p>
+                                <input type="file" id="cover-input" hidden accept="image/png,image/jpeg,image/jpg,image/webp">
+                                <button class="btn-choose-cover" onclick="document.getElementById('cover-input').click()">
+                                    <svg viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
+                                    Escolher Imagem
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="import-section">
+                        <div class="import-section-title">Ficheiro do Modelo</div>
+                        <div class="import-tabs">
+                            <button class="import-tab active" data-import-tab="link">
+                                <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                                Link Directo
+                            </button>
+                            <button class="import-tab" data-import-tab="file">
+                                <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                Ficheiro Local
                             </button>
                         </div>
+                        <div class="import-tab-content active" id="import-tab-link">
+                            <div class="import-field">
+                                <label>URL do Modelo <span class="required">*</span></label>
+                                <input type="url" id="import-url" placeholder="https://huggingface.co/usuario/modelo/resolve/main/modelo.pth">
+                            </div>
+                            <div class="import-hint">
+                                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                                Suporta HuggingFace, Google Drive, Pixeldrain e links diretos
+                            </div>
+                        </div>
+                        <div class="import-tab-content" id="import-tab-file">
+                            <div class="file-drop-zone" id="model-file-drop">
+                                <input type="file" id="model-file-input" hidden accept=".zip,.pth,.index">
+                                <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+                                <p>Arraste e solte o arquivo .zip ou .pth aqui</p>
+                                <span>ou clique para navegar pelo seu computador</span>
+                                <div class="file-drop-formats">
+                                    <span class="file-format-badge">.ZIP</span>
+                                    <span class="file-format-badge">.PTH</span>
+                                    <span class="file-format-badge">.INDEX</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="import-footer">
+                        <button class="import-cancel" onclick="switchTab('voice-models')">Cancelar</button>
+                        <button class="btn-publish-model" onclick="publishModel()">
+                            <svg viewBox="0 0 24 24"><path d="M12 3v12"/><polyline points="7 8 12 3 17 8"/><path d="M5 21h14a2 2 0 0 0 2-2v-4"/></svg>
+                            Publicar Modelo
+                        </button>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Minhas Criações Tab -->
-            <div id="minhas-criacoes" class="tab-content">
-                <div class="header-section">
-                    <h1>Minhas Criações</h1>
-                    <p>Seus modelos de voz treinados e importados</p>
-                </div>
-                <div class="empty-state">
-                    <p>Você ainda não criou nenhum modelo.</p>
-                </div>
+        <div id="favoritos" class="tab-pane">
+            <div class="page-header"><h1>Favoritos</h1><p>Seus modelos favoritos</p></div>
+            <div style="text-align:center;padding:80px 0;color:var(--text-muted)"><h3>Nenhum favorito</h3></div>
+        </div>
+
+        <div id="colecoes" class="tab-pane">
+            <div class="page-header"><h1>Coleções</h1><p>Suas coleções de modelos</p></div>
+            <div style="text-align:center;padding:80px 0;color:var(--text-muted)"><h3>Nenhuma coleção</h3></div>
+        </div>
+    </main>
+</div>
+
+<!-- MODAL IMPORTAR MODELO -->
+<div class="import-modal-overlay" id="import-modal" role="dialog" aria-modal="true" aria-labelledby="import-modal-title">
+    <div class="import-modal">
+        <div class="modal-heading">
+            <div>
+                <h2 id="import-modal-title">Importar modelo</h2>
+                <p>Adicione uma voz à biblioteca do Weights Revival.</p>
             </div>
-
-            <!-- Importar Modelo Tab -->
-            <div id="importar" class="tab-content">
-                <div class="header-section">
-                    <h1>Importar Modelo</h1>
-                    <p>Adicione um novo modelo de voz ao seu perfil</p>
-                </div>
-                
-                <div class="form-group">
-                    <label>Nome do Modelo</label>
-                    <input type="text" placeholder="Ex: Minha Voz Épica">
-                </div>
-
-                <div class="form-group">
-                    <label>Versão do RVC</label>
-                    <div class="radio-group">
-                        <label>
-                            <input type="radio" name="rvc-version" value="v1" checked>
-                            RVC v1
-                        </label>
-                        <label>
-                            <input type="radio" name="rvc-version" value="v2">
-                            RVC v2
-                        </label>
+            <button class="modal-close" type="button" onclick="closeImportModal()" aria-label="Fechar">
+                <svg viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+            </button>
+        </div>
+        <form class="import-modal-form" id="import-modal-form">
+            <div class="modal-field">
+                <label for="modal-model-name">Nome da voz <span>*</span></label>
+                <input id="modal-model-name" name="name" type="text" maxlength="60" placeholder="Ex.: Minha voz favorita" required>
+            </div>
+            <div class="modal-field">
+                <label for="modal-model-category">Categoria</label>
+                <select id="modal-model-category" name="category">
+                    <option value="others">Selecione uma categoria</option>
+                    <option value="anime">Anime</option>
+                    <option value="games">Jogos</option>
+                    <option value="cartoon">Desenho</option>
+                    <option value="musicians">Músicos</option>
+                    <option value="movies">Filmes</option>
+                    <option value="others">Outros</option>
+                </select>
+            </div>
+            <div class="modal-field">
+                <label for="modal-model-url">Link do Hugging Face <span>*</span></label>
+                <input id="modal-model-url" name="url" type="url" placeholder="https://huggingface.co/.../resolve/main/model.pth" required>
+                <small>Informe um link público que termine em .pth ou .index. Este protótipo salva os dados localmente.</small>
+            </div>
+            <div class="modal-field">
+                <label for="modal-cover-file">Imagem de capa</label>
+                <input type="file" id="modal-cover-file" accept="image/png,image/jpeg,image/webp" hidden>
+                <div class="import-cover-drop" id="modal-cover-drop" role="button" tabindex="0" aria-label="Selecionar ou arrastar imagem de capa">
+                    <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5 11 16.51 14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+                    <div class="import-cover-drop-copy">
+                        <strong id="modal-cover-title">Arraste uma imagem ou clique para escolher</strong>
+                        <span id="modal-cover-hint">PNG, JPG ou WEBP · até 5 MB</span>
                     </div>
                 </div>
-
-                <div class="form-group">
-                    <label>Arquivo do Modelo (.pth e .index)</label>
-                    <input type="file" multiple style="padding: 8px 0;">
-                </div>
-
-                <button class="btn-submit">Importar Modelo</button>
             </div>
-
-        </main>
+            <div class="import-modal-actions">
+                <button class="import-cancel" type="button" onclick="closeImportModal()">Cancelar</button>
+                <button class="btn-publish-model" type="submit">Publicar Modelo</button>
+            </div>
+        </form>
     </div>
+</div>
 
-    <!-- JavaScript para Troca de Abas -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const navItems = document.querySelectorAll('.nav-item[data-target]');
-            const tabContents = document.querySelectorAll('.tab-content');
+<!-- MODAL LOGIN SOCIAL -->
+<div class="social-login-overlay" id="social-login-modal" role="dialog" aria-modal="true" aria-labelledby="social-login-title">
+    <div class="social-login-modal">
+        <button class="modal-close" type="button" onclick="closeLoginModal()" aria-label="Fechar">
+            <svg viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+        <div class="social-login-mark">W</div>
+        <h2 id="social-login-title">Bem-vindo de volta</h2>
+        <p>Escolha uma conta para continuar no Weights Revival.</p>
+        <div class="social-login-buttons">
+            <button class="social-login-button discord" type="button" onclick="startSocialLogin('Discord')">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.73 5.09A19.2 19.2 0 0 0 15 3.62l-.23.47a17.6 17.6 0 0 0-5.54 0L9 3.62a19.2 19.2 0 0 0-4.73 1.47C1.28 9.5.47 13.8.88 18.04a19.4 19.4 0 0 0 5.8 2.94l1.25-2.03a12.6 12.6 0 0 1-1.97-.96l.48-.37c3.8 1.76 7.93 1.76 11.68 0l.49.37c-.64.38-1.3.7-1.98.96l1.25 2.03a19.4 19.4 0 0 0 5.8-2.94c.48-4.92-.81-9.18-3.95-12.95ZM8.7 14.9c-1.14 0-2.08-1.04-2.08-2.32s.91-2.32 2.08-2.32 2.1 1.05 2.08 2.32c0 1.28-.92 2.32-2.08 2.32Zm6.6 0c-1.14 0-2.08-1.04-2.08-2.32s.91-2.32 2.08-2.32 2.1 1.05 2.08 2.32c0 1.28-.91 2.32-2.08 2.32Z"/></svg>
+                Entrar com Discord
+            </button>
+            <button class="social-login-button google" type="button" onclick="startSocialLogin('Google')">
+                <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M21.35 12.2c0-.7-.06-1.38-.18-2.03H12v3.84h5.24a4.48 4.48 0 0 1-1.94 2.94v2.4h3.14c1.84-1.7 2.91-4.2 2.91-7.15Z"/><path fill="#34A853" d="M12 21.7c2.63 0 4.83-.87 6.44-2.35l-3.14-2.4c-.87.58-1.98.92-3.3.92-2.54 0-4.69-1.72-5.46-4.03H3.3v2.48A9.72 9.72 0 0 0 12 21.7Z"/><path fill="#FBBC05" d="M6.54 13.84a5.84 5.84 0 0 1 0-3.68V7.68H3.3a9.72 9.72 0 0 0 0 8.64l3.24-2.48Z"/><path fill="#EA4335" d="M12 6.13c1.43 0 2.71.49 3.72 1.47l2.79-2.79A9.32 9.32 0 0 0 12 2.3a9.72 9.72 0 0 0-8.7 5.38l3.24 2.48C7.31 7.85 9.46 6.13 12 6.13Z"/></svg>
+                Continuar com Google
+            </button>
+        </div>
+        <small class="login-disclaimer">Habilite o Discord nos provedores do Supabase e configure a URL de retorno indicada no painel.</small>
+    </div>
+</div>
 
-            navItems.forEach(item => {
-                item.addEventListener('click', (e) => {
-                    e.preventDefault();
+<!-- MODAL CRIAR COVER -->
+<div class="cover-modal-overlay" id="cover-modal">
+    <div class="cover-modal">
+        <div class="cover-modal-header">
+            <div class="cover-modal-title-row">
+                <div>
+                    <h2 class="cover-modal-title">Criar Cover</h2>
+                    <p class="cover-modal-subtitle">Escolha o áudio de entrada</p>
+                </div>
+                <button class="cover-modal-close" onclick="closeCoverModal()" title="Fechar">
+                    <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                </button>
+            </div>
+            <div class="cover-stepper">
+                <div class="cover-step completed">
+                    <div class="cover-step-circle"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    <span class="cover-step-label">Voz</span>
+                </div>
+                <div class="cover-step-connector completed"></div>
+                <div class="cover-step active">
+                    <div class="cover-step-circle">2</div>
+                    <span class="cover-step-label">Áudio</span>
+                </div>
+                <div class="cover-step-connector"></div>
+                <div class="cover-step">
+                    <div class="cover-step-circle">3</div>
+                    <span class="cover-step-label">Ajustes</span>
+                </div>
+            </div>
+        </div>
 
-                    navItems.forEach(nav => nav.classList.remove('active'));
-                    item.classList.add('active');
+        <div class="cover-modal-body">
+            <!-- Generating overlay -->
+            <div class="generating-overlay" id="generating-overlay">
+                <div class="generating-spinner"></div>
+                <h3>A gerar seu cover...</h3>
+                <p>Aplicando a voz selecionada ao áudio</p>
+            </div>
 
-                    tabContents.forEach(tab => tab.classList.remove('active'));
+            <!-- ABAS SEMPRE VISÍVEIS -->
+            <div class="cover-audio-tabs">
+                <button class="cover-audio-tab active" data-cover-tab="audio">Áudio</button>
+                <button class="cover-audio-tab" data-cover-tab="tts">Texto para Voz</button>
+                <button class="cover-audio-tab" data-cover-tab="record">Gravação</button>
+            </div>
 
-                    const targetId = item.getAttribute('data-target');
-                    const targetTab = document.getElementById(targetId);
-                    if (targetTab) {
-                        targetTab.classList.add('active');
-                    }
-                });
-            });
+            <div class="cover-panel active" id="cover-panel-audio">
+                <div class="cover-section">
+                    <div class="cover-section-title">Usado recentemente</div>
+                    <div class="recent-audios">
+                        <div class="recent-audio-item" onclick="selectRecentAudio(this, 'Lolly O — Japanese Boy')">
+                            <div class="recent-audio-icon"><svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg></div>
+                            <div class="recent-audio-info">
+                                <div class="recent-audio-name">Lolly O — Japanese Boy</div>
+                                <div class="recent-audio-meta">2 semanas atrás · 3:24</div>
+                            </div>
+                            <button class="recent-audio-play" onclick="event.stopPropagation();"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+                        </div>
+                        <div class="recent-audio-item" onclick="selectRecentAudio(this, 'MY OH MY')">
+                            <div class="recent-audio-icon"><svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg></div>
+                            <div class="recent-audio-info">
+                                <div class="recent-audio-name">MY OH MY.mp3</div>
+                                <div class="recent-audio-meta">3 semanas atrás · 2:48</div>
+                            </div>
+                            <button class="recent-audio-play" onclick="event.stopPropagation();"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cover-section">
+                    <div class="cover-section-title">Buscar no YouTube</div>
+
+                    <!-- INPUT (escondido quando confirma) -->
+                    <div class="youtube-input-wrapper" id="youtube-input-wrapper">
+                        <div class="youtube-input-box" id="youtube-input-box">
+                            <svg class="youtube-icon" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                            <input type="text" id="youtube-url-input" placeholder="Cole o link do vídeo do YouTube...">
+                        </div>
+                        <button class="btn-paste-url" id="btn-paste-url" onclick="processYoutubeUrl()">Colar URL</button>
+                    </div>
+
+                    <div class="youtube-loading" id="youtube-loading">
+                        <div class="youtube-loading-spinner"></div>
+                        <span>Carregando áudio do YouTube...</span>
+                    </div>
+
+                    <div class="youtube-error" id="youtube-error">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                        <span id="youtube-error-text">Insira um link válido do YouTube</span>
+                    </div>
+
+                    <div class="youtube-confirmation" id="youtube-confirmation">
+                        <img src="" alt="Thumbnail" class="youtube-thumb" id="youtube-thumb">
+                        <div class="youtube-confirm-info">
+                            <div class="youtube-confirm-title" id="youtube-title">Título do vídeo</div>
+                            <div class="youtube-confirm-meta">
+                                <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                                <span id="youtube-meta">YouTube</span>
+                            </div>
+                        </div>
+                        <button class="youtube-check-btn" id="youtube-check-btn" onclick="confirmYoutubeSelection()" title="Confirmar">
+                            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        </button>
+                        <button class="youtube-remove-btn" onclick="resetYoutube()" title="Remover">
+                            <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="cover-divider">ou</div>
+
+                <div class="cover-upload-zone" id="cover-upload-zone">
+                    <input type="file" id="cover-file-input" hidden accept="audio/mpeg,audio/mp3,audio/wav,audio/x-wav,audio/m4a,audio/flac">
+                    <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+                    <p>Arraste ou selecione um arquivo de áudio</p>
+                    <span>Formatos suportados até 50MB</span>
+                    <div class="cover-upload-formats">
+                        <span class="cover-format-badge">.MP3</span>
+                        <span class="cover-format-badge">.WAV</span>
+                        <span class="cover-format-badge">.M4A</span>
+                        <span class="cover-format-badge">.FLAC</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cover-panel" id="cover-panel-tts">
+                <textarea class="tts-textarea" id="cover-tts-text" placeholder="Digite ou cole o texto que você deseja converter em voz..."></textarea>
+                <div class="tts-char-counter" id="cover-tts-counter">0 / 1000 caracteres</div>
+            </div>
+
+            <div class="cover-panel" id="cover-panel-record">
+                <div class="record-container">
+                    <button class="record-circle" id="cover-record-circle" onclick="toggleCoverRecording()">
+                        <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+                    </button>
+                    <div class="record-timer" id="cover-record-timer">00:00</div>
+                    <div class="record-hint" id="cover-record-hint">Clique no microfone para começar a gravar</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="cover-modal-footer">
+            <div class="cover-footer-left">
+                <button class="btn-cover-cancel" onclick="closeCoverModal()">Cancelar</button>
+                <button class="btn-cover-secondary" id="cover-btn-back" disabled>
+                    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                    Voltar
+                </button>
+            </div>
+            <button class="btn-cover-next" id="cover-btn-next" onclick="advanceCoverStep()" disabled>
+                Avançar
+                <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL ALTERAR FOTO -->
+<div class="change-photo-overlay" id="change-photo-modal">
+    <div class="change-photo-modal">
+        <h2>Alterar Foto de Perfil</h2>
+        <p class="subtitle">Cole o link de uma imagem ou envie um arquivo</p>
+        <div class="current-photo-preview">
+            <img src="https://i.pravatar.cc/150?img=68" alt="Preview" id="photo-preview">
+        </div>
+        <div class="photo-method">
+            <label>Link da Imagem (URL)</label>
+            <input type="url" id="photo-url-input" placeholder="https://exemplo.com/sua-foto.jpg">
+        </div>
+        <div class="photo-divider"><span>OU</span></div>
+        <div class="photo-method">
+            <input type="file" id="photo-file-input" hidden accept="image/png,image/jpeg,image/jpg,image/webp,image/gif">
+            <button class="btn-file-upload" onclick="document.getElementById('photo-file-input').click()">
+                <svg viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
+                Escolher arquivo do computador
+            </button>
+        </div>
+        <div class="photo-actions">
+            <button class="btn-photo-cancel" onclick="closeChangePhotoModal()">Cancelar</button>
+            <button class="btn-photo-save" id="btn-save-photo">Salvar Foto</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://vvlrmoedtuyxakidizhl.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_pPXz6iHNxysSueCQZzpP5A_aw8Ych0E';
+const APP_ENTRY_FILE = 'deepseek_html_20261014_92896b (13).html';
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY,
+    {
+        auth: {
+            flowType: 'pkce',
+            detectSessionInUrl: false,
+            persistSession: true,
+            autoRefreshToken: true
+        }
+    }
+);
+
+/* =========================================================
+   DADOS
+   ========================================================= */
+let models = [];
+let modelsLoading = true;
+let modelsLoadError = false;
+
+function escapeHTML(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[char]);
+}
+function formatCount(value) {
+    const count = Number(value) || 0;
+    return count >= 1000 ? `${(count / 1000).toFixed(count >= 10000 ? 0 : 1).replace(/\.0$/, '')}k` : String(count);
+}
+
+function generateFallbackImage(name) {
+    const initial = escapeHTML(name ? name.charAt(0).toUpperCase() : '?');
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="#E5E7EB"/><text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" font-family="Arial" font-size="40" fill="#6B7280">${initial}</text></svg>`;
+    return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+}
+
+/* =========================================================
+   RENDER MODELS
+   ========================================================= */
+function renderModels() {
+    const grid = document.getElementById('models-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    if (modelsLoading) {
+        grid.innerHTML = '<div class="empty-models">Carregando modelos de voz...</div>';
+        return;
+    }
+    if (modelsLoadError) {
+        grid.innerHTML = '<div class="empty-models">Não foi possível carregar os modelos. Verifique a conexão e tente novamente.<br><button class="use-btn" id="retry-models-load" type="button" style="margin: 16px auto 0;">Tentar novamente</button></div>';
+        grid.querySelector('#retry-models-load').addEventListener('click', loadVoiceModels);
+        return;
+    }
+    const searchTerm = (document.getElementById('model-search')?.value || '').trim().toLowerCase();
+    const activeFilter = document.querySelector('.filter-btn.active')?.dataset.filter || 'all';
+    const visibleModels = models.filter(model => {
+        const searchable = `${model.name} ${model.creator} ${model.category} ${model.gender} ${(model.tags || []).join(' ')}`.toLowerCase();
+        if (searchTerm && !searchable.includes(searchTerm)) return false;
+        if (activeFilter === 'masculino' || activeFilter === 'feminino') return model.gender === activeFilter;
+        if (activeFilter === 'popular') return Number(model.uses) >= 5000;
+        if (activeFilter === 'recent') return Boolean(model.createdAt);
+        if (['anime', 'games', 'cartoon'].includes(activeFilter)) return model.category === activeFilter;
+        return true;
+    }).sort((a, b) => {
+        if (activeFilter === 'popular') return Number(b.uses) - Number(a.uses);
+        if (activeFilter === 'recent') return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        return 0;
+    });
+    visibleModels.forEach(model => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.setAttribute('data-id', escapeHTML(model.id));
+        const tagsHtml = model.tags.map(tag => `<span class="tag">${escapeHTML(tag)}</span>`).join('');
+        const isLiked = localStorage.getItem(`liked_${model.id}`) === 'true';
+        const likedClass = isLiked ? 'liked' : '';
+        const fallbackImg = escapeHTML(generateFallbackImage(model.name));
+        card.innerHTML = `
+            <button class="delete-btn" type="button" title="Excluir" aria-label="Excluir modelo">
+                <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+            </button>
+            <div class="card-cover">
+                <div class="avatar-wrapper">
+                    <img src="${escapeHTML(model.image || fallbackImg)}" alt="${escapeHTML(model.name)}" class="card-avatar">
+                    <button class="play-button" type="button" aria-label="Prévia da voz" ${model.audioUrl ? '' : 'disabled title="Prévia indisponível"'}>
+                        <svg class="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        <svg class="icon-pause" viewBox="0 0 24 24" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <h3 class="card-title">${escapeHTML(model.name)}</h3>
+                <p class="card-author">por ${escapeHTML(model.creator)}</p>
+                <div class="tags">${tagsHtml}</div>
+                <div class="model-meta"><span class="model-usage"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9 9 9 0 0 0-9-9zm1 4v5.4l3.2 1.9-1 1.7L11 13.5V7z"/></svg>${formatCount(model.uses)} usos</span></div>
+                <div class="card-footer">
+                    <div class="card-footer-actions">
+                        <button class="likes ${likedClass}" type="button" aria-label="Curtir modelo">
+                            <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                            <span class="like-count">${formatCount(model.likes)}</span>
+                        </button>
+                    </div>
+                    <button class="use-btn" type="button">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
+                            <path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/>
+                        </svg>
+                        <span>Usar</span>
+                    </button>
+                </div>
+            </div>`;
+        const modelImage = card.querySelector('.card-avatar');
+        modelImage.addEventListener('error', () => { modelImage.src = fallbackImg; }, { once: true });
+        card.querySelector('.delete-btn').addEventListener('click', () => confirmDelete(model.id));
+        if (model.audioUrl) {
+            card.querySelector('.play-button').addEventListener('click', event => togglePlay(model.id, event.currentTarget));
+        }
+        card.querySelector('.likes').addEventListener('click', event => toggleLike(model.id, event.currentTarget));
+        card.querySelector('.use-btn').addEventListener('click', () => openCoverModal(model.id));
+        grid.appendChild(card);
+    });
+    if (!visibleModels.length) grid.innerHTML = '<div class="empty-models">Nenhum modelo encontrado. Tente outro filtro ou termo de busca.</div>';
+}
+
+function normalizeVoiceModel(row) {
+    const category = String(row.category || 'others').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const gender = String(row.gender || (['masculino', 'feminino'].includes(category) ? category : 'outros')).trim().toLowerCase();
+    const categoryAliases = { desenho: 'cartoon', jogos: 'games', jogo: 'games', cartoons: 'cartoon' };
+    return {
+        id: String(row.id),
+        name: String(row.title || 'Modelo sem título'),
+        creator: String(row.creator || 'Criador desconhecido'),
+        category: categoryAliases[category] || category,
+        gender,
+        image: row.image_url || '',
+        audioUrl: row.audio_url || '',
+        uses: Number(row.downloads) || 0,
+        likes: Number(row.likes) || 0,
+        createdAt: row.created_at || null,
+        tags: Array.isArray(row.tags) ? row.tags : []
+    };
+}
+
+async function loadVoiceModels() {
+    modelsLoading = true;
+    modelsLoadError = false;
+    renderModels();
+    try {
+        const { data, error } = await supabaseClient
+            .from('voice_models')
+            .select('*');
+        if (error) throw error;
+        if (!Array.isArray(data)) throw new Error('Resposta inválida ao carregar os modelos de voz.');
+        models = data.map(normalizeVoiceModel);
+        modelsLoading = false;
+        renderModels();
+    } catch (error) {
+        console.error('Não foi possível carregar os modelos do Supabase:', error);
+        models = [];
+        modelsLoading = false;
+        modelsLoadError = true;
+        renderModels();
+        showToast('Erro ao carregar modelos. Confira a tabela voice_models e as permissões de leitura no Supabase.', 'danger');
+    }
+}
+
+function toggleLike(id, el) {
+    const isLiked = el.classList.toggle('liked');
+    localStorage.setItem(`liked_${id}`, isLiked);
+    const model = models.find(m => m.id === id);
+    if (model) {
+        model.likes = Math.max(0, Number(model.likes || 0) + (isLiked ? 1 : -1));
+        el.querySelector('.like-count').textContent = formatCount(model.likes);
+        localStorage.setItem('weightsModels', JSON.stringify(models));
+    }
+}
+
+let playingModels = [];
+const voiceAudio = new Map();
+async function togglePlay(id, btn) {
+    const ip = btn.querySelector('.icon-play');
+    const ipa = btn.querySelector('.icon-pause');
+    const model = models.find(item => item.id === id);
+    if (!model?.audioUrl) return;
+    let audio = voiceAudio.get(id);
+    if (!audio) {
+        audio = new Audio(model.audioUrl);
+        audio.addEventListener('ended', () => {
+            btn.classList.remove('playing');
+            ip.style.display = 'block';
+            ipa.style.display = 'none';
+            playingModels = playingModels.filter(playingId => playingId !== id);
         });
-    </script>
+        audio.addEventListener('error', () => {
+            btn.classList.remove('playing');
+            ip.style.display = 'block';
+            ipa.style.display = 'none';
+            playingModels = playingModels.filter(playingId => playingId !== id);
+            showToast('Não foi possível reproduzir a prévia deste modelo.', 'danger');
+        });
+        voiceAudio.set(id, audio);
+    }
+    if (audio.paused) {
+        voiceAudio.forEach((otherAudio, otherId) => {
+            if (otherId !== id) {
+                otherAudio.pause();
+                const otherButton = document.querySelector(`.card[data-id="${CSS.escape(otherId)}"] .play-button`);
+                if (otherButton) {
+                    otherButton.classList.remove('playing');
+                    otherButton.querySelector('.icon-play').style.display = 'block';
+                    otherButton.querySelector('.icon-pause').style.display = 'none';
+                }
+            }
+        });
+        try {
+            await audio.play();
+        } catch (error) {
+            btn.classList.remove('playing');
+            playingModels = playingModels.filter(playingId => playingId !== id);
+            ip.style.display = 'block';
+            ipa.style.display = 'none';
+            console.error('Não foi possível reproduzir a prévia da voz:', error);
+            showToast('Não foi possível reproduzir a prévia deste modelo.', 'danger');
+            return;
+        }
+        btn.classList.add('playing');
+        playingModels = playingModels.filter(playingId => playingId !== id);
+        playingModels.push(id);
+        ip.style.display = 'none';
+        ipa.style.display = 'block';
+    } else {
+        audio.pause();
+        btn.classList.remove('playing');
+        playingModels = playingModels.filter(playingId => playingId !== id);
+        ip.style.display = 'block';
+        ipa.style.display = 'none';
+    }
+}
+
+function confirmDelete(id) {
+    if (confirm('Tem certeza que deseja excluir este modelo?')) {
+        models = models.filter(m => m.id !== id);
+        localStorage.setItem('weightsModels', JSON.stringify(models));
+        localStorage.removeItem(`liked_${id}`);
+        renderModels();
+        showToast('Modelo excluído', 'danger');
+    }
+}
+
+function switchTab(targetId) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(t => t.classList.remove('active'));
+    const activeNav = document.querySelector(`.nav-item[data-target="${targetId}"]`);
+    if (activeNav) activeNav.classList.add('active');
+    const targetTab = document.getElementById(targetId);
+    if (targetTab) targetTab.classList.add('active');
+}
+
+document.querySelectorAll('.nav-item[data-target]').forEach(item => {
+    item.addEventListener('click', () => switchTab(item.getAttribute('data-target')));
+});
+document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderModels();
+    });
+});
+document.getElementById('model-search')?.addEventListener('input', renderModels);
+
+/* =========================================================
+   IMPORTAR MODELO
+   ========================================================= */
+const importModal = document.getElementById('import-modal');
+const importModalForm = document.getElementById('import-modal-form');
+const modalCoverFile = document.getElementById('modal-cover-file');
+const modalCoverDrop = document.getElementById('modal-cover-drop');
+let modalCoverData = null;
+
+function openImportModal() {
+    importModal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('modal-model-name').focus();
+}
+function closeImportModal() {
+    importModal.classList.remove('active');
+    document.body.style.overflow = '';
+}
+function previewImportCover(file) {
+    if (!file) return;
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+        showToast('Use uma imagem PNG, JPG ou WEBP.', 'danger');
+        return;
+    }
+    if (file.size > 3 * 1024 * 1024) {
+        showToast('A imagem deve ter no máximo 3 MB.', 'danger');
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = event => {
+        modalCoverData = event.target.result;
+        modalCoverDrop.innerHTML = `<img src="${modalCoverData}" alt="Prévia da capa"><div class="import-cover-drop-copy"><strong>${escapeHTML(file.name)}</strong><span>Imagem pronta para publicação</span></div>`;
+    };
+    reader.onerror = () => showToast('Não foi possível ler a imagem selecionada.', 'danger');
+    reader.readAsDataURL(file);
+}
+modalCoverDrop.addEventListener('click', () => modalCoverFile.click());
+modalCoverDrop.addEventListener('keydown', event => {
+    if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        modalCoverFile.click();
+    }
+});
+modalCoverDrop.addEventListener('dragover', event => {
+    event.preventDefault();
+    modalCoverDrop.classList.add('dragover');
+});
+modalCoverDrop.addEventListener('dragleave', () => modalCoverDrop.classList.remove('dragover'));
+modalCoverDrop.addEventListener('drop', event => {
+    event.preventDefault();
+    modalCoverDrop.classList.remove('dragover');
+    previewImportCover(event.dataTransfer.files[0]);
+});
+modalCoverFile.addEventListener('change', () => previewImportCover(modalCoverFile.files[0]));
+importModal.addEventListener('click', event => {
+    if (event.target === importModal) closeImportModal();
+});
+importModalForm.addEventListener('submit', event => {
+    event.preventDefault();
+    const name = document.getElementById('modal-model-name').value.trim();
+    const categorySelect = document.getElementById('modal-model-category');
+    const category = categorySelect.value;
+    const modelUrl = document.getElementById('modal-model-url').value.trim();
+    if (!name) {
+        showToast('Informe o nome da voz.', 'danger');
+        return;
+    }
+    let parsedUrl;
+    try {
+        parsedUrl = new URL(modelUrl);
+    } catch (error) {
+        showToast('Informe um link válido do Hugging Face.', 'danger');
+        return;
+    }
+    const modelExtension = parsedUrl.pathname.toLowerCase();
+    if (parsedUrl.protocol !== 'https:' || !['huggingface.co', 'www.huggingface.co'].includes(parsedUrl.hostname) || !/\.(pth|index)$/.test(modelExtension)) {
+        showToast('O link deve ser do Hugging Face e apontar para um arquivo .pth ou .index.', 'danger');
+        return;
+    }
+    const categoryNames = { anime: 'Anime', games: 'Jogos', cartoon: 'Desenho', musicians: 'Músicos', movies: 'Filmes', others: 'Outros' };
+    const newModel = {
+        id: `model_${Date.now()}`,
+        name,
+        creator: currentUser?.name || 'Você',
+        image: modalCoverData || generateFallbackImage(name),
+        tags: ['RVC V2', 'PT-BR', categoryNames[category] || 'Outros'],
+        likes: 0,
+        uses: 0,
+        category,
+        gender: 'outros',
+        modelUrl
+    };
+    models.unshift(newModel);
+    try {
+        localStorage.setItem('weightsModels', JSON.stringify(models));
+    } catch (error) {
+        models.shift();
+        console.error('Não foi possível salvar o modelo:', error);
+        showToast('Não foi possível salvar. Remova imagens antigas ou tente uma capa menor.', 'danger');
+        return;
+    }
+    importModalForm.reset();
+    modalCoverData = null;
+    modalCoverDrop.innerHTML = '<svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5 11 16.51 14.5 12l4.5 6H5l3.5-4.5z"/></svg><div class="import-cover-drop-copy"><strong id="modal-cover-title">Arraste uma imagem ou clique para escolher</strong><span id="modal-cover-hint">PNG, JPG ou WEBP · até 3 MB</span></div>';
+    closeImportModal();
+    renderModels();
+    showToast('Modelo publicado com sucesso!', 'success');
+});
+
+document.querySelectorAll('.import-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+        const tabName = this.dataset.importTab;
+        document.querySelectorAll('.import-tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        document.querySelectorAll('.import-tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById('import-tab-' + tabName).classList.add('active');
+    });
+});
+
+const coverInput = document.getElementById('cover-input');
+const coverPreview = document.getElementById('cover-preview');
+let uploadedCoverData = null;
+
+coverPreview?.addEventListener('click', () => coverInput.click());
+coverInput?.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = event => {
+        uploadedCoverData = event.target.result;
+        coverPreview.innerHTML = `<img src="${uploadedCoverData}" alt="Cover">`;
+        coverPreview.style.borderStyle = 'solid';
+        coverPreview.style.borderColor = 'var(--accent-purple)';
+        showToast('Capa carregada!', 'success');
+    };
+    reader.readAsDataURL(file);
+});
+
+const modelFileDrop = document.getElementById('model-file-drop');
+const modelFileInput = document.getElementById('model-file-input');
+modelFileDrop?.addEventListener('click', () => modelFileInput.click());
+modelFileDrop?.addEventListener('dragover', e => {
+    e.preventDefault();
+    modelFileDrop.classList.add('dragover');
+});
+modelFileDrop?.addEventListener('dragleave', () => modelFileDrop.classList.remove('dragover'));
+modelFileDrop?.addEventListener('drop', e => {
+    e.preventDefault();
+    modelFileDrop.classList.remove('dragover');
+    if (e.dataTransfer.files.length) {
+        modelFileDrop.querySelector('p').textContent = '✓ ' + e.dataTransfer.files[0].name;
+        modelFileDrop.style.borderColor = 'var(--success)';
+        modelFileDrop.style.background = '#F0FDF4';
+    }
+});
+modelFileInput?.addEventListener('change', () => {
+    if (modelFileInput.files.length) {
+        modelFileDrop.querySelector('p').textContent = '✓ ' + modelFileInput.files[0].name;
+        modelFileDrop.style.borderColor = 'var(--success)';
+        modelFileDrop.style.background = '#F0FDF4';
+    }
+});
+
+function publishModel() {
+    const name = document.getElementById('import-name').value.trim();
+    const creator = document.getElementById('import-creator').value.trim();
+    const category = document.getElementById('import-category').value;
+    const language = document.getElementById('import-language').value;
+
+    if (!name || !creator) {
+        showToast('Preencha Nome e Criador.', 'danger');
+        return;
+    }
+
+    const tags = [];
+    if (category) tags.push(category);
+    if (language) tags.push(language.toUpperCase());
+    if (!tags.length) tags.push('RVC V2');
+
+    const newModel = {
+        id: 'model_' + Date.now(),
+        name: name,
+        creator: creator,
+        image: uploadedCoverData || generateFallbackImage(name),
+        tags: tags,
+        likes: 0,
+        uses: 0,
+        category: category || 'others',
+        gender: 'outros'
+    };
+
+    models.unshift(newModel);
+    localStorage.setItem('weightsModels', JSON.stringify(models));
+
+    document.getElementById('import-name').value = '';
+    document.getElementById('import-creator').value = '';
+    document.getElementById('import-category').value = '';
+    document.getElementById('import-language').value = '';
+    document.getElementById('import-url').value = '';
+    uploadedCoverData = null;
+    coverPreview.innerHTML = '<svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>';
+    coverPreview.style.borderStyle = 'dashed';
+    coverPreview.style.borderColor = '#D1D5DB';
+    modelFileDrop.querySelector('p').textContent = 'Arraste e solte o arquivo .zip ou .pth aqui';
+    modelFileDrop.style.borderColor = '#D1D5DB';
+    modelFileDrop.style.background = 'var(--bg-main)';
+
+    renderModels();
+    switchTab('voice-models');
+    showToast('Modelo publicado com sucesso!', 'success');
+}
+
+/* =========================================================
+   MODAL CRIAR COVER
+   ========================================================= */
+let youtubeConfirmed = false;
+let currentYoutubeData = null;
+let currentStep = 2; // Etapa atual (2 = Áudio, 3 = Ajustes)
+const coverBtnNext = document.getElementById('cover-btn-next');
+const coverBtnBack = document.getElementById('cover-btn-back');
+const generatingOverlay = document.getElementById('generating-overlay');
+
+function openCoverModal(modelId) {
+    const selectedModel = models.find(model => model.id === modelId);
+    if (selectedModel) {
+        selectedModel.uses = Number(selectedModel.uses || 0) + 1;
+        localStorage.setItem('weightsModels', JSON.stringify(models));
+        renderModels();
+    }
+    resetYoutube();
+    selectedCoverAudio = false;
+    if (coverFileInput) coverFileInput.value = '';
+    if (coverUploadZone) {
+        coverUploadZone.style.borderColor = '';
+        coverUploadZone.style.background = '';
+        coverUploadZone.querySelector('p').textContent = 'Arraste ou selecione um arquivo de áudio';
+    }
+    document.querySelectorAll('.recent-audio-item').forEach(item => item.classList.remove('selected'));
+    currentStep = 2;
+    resetStepper();
+    document.getElementById('cover-modal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    updateNextButton();
+}
+
+function closeCoverModal() {
+    document.getElementById('cover-modal').classList.remove('active');
+    document.body.style.overflow = '';
+    document.querySelectorAll('.cover-audio-tab').forEach((t, i) => t.classList.toggle('active', i === 0));
+    document.querySelectorAll('.cover-panel').forEach((p, i) => p.classList.toggle('active', i === 0));
+    const circle = document.getElementById('cover-record-circle');
+    if (circle && circle.classList.contains('recording')) toggleCoverRecording();
+    document.getElementById('cover-record-timer').textContent = '00:00';
+    selectedCoverAudio = false;
+    if (coverFileInput) coverFileInput.value = '';
+    generatingOverlay.classList.remove('active');
+    resetYoutube();
+    resetStepper();
+    currentStep = 2;
+}
+
+document.getElementById('cover-modal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('cover-modal')) closeCoverModal();
+});
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && document.getElementById('cover-modal').classList.contains('active')) closeCoverModal();
+});
+
+/* TABS DO MODAL */
+document.querySelectorAll('.cover-audio-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+        const panelName = this.dataset.coverTab;
+        document.querySelectorAll('.cover-audio-tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        document.querySelectorAll('.cover-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById('cover-panel-' + panelName).classList.add('active');
+        updateNextButton();
+    });
+});
+
+/* =========================================================
+   YOUTUBE — VALIDAÇÃO E PROCESSAMENTO
+   ========================================================= */
+function extractYoutubeId(url) {
+    if (!url || typeof url !== 'string') return null;
+    const trimmed = url.trim();
+    const patterns = [
+        /(?:youtube\.com\/watch\?(?:.*&)?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/|youtube\.com\/v\/|music\.youtube\.com\/watch\?(?:.*&)?v=)([a-zA-Z0-9_-]{11})/
+    ];
+    for (const pattern of patterns) {
+        const match = trimmed.match(pattern);
+        if (match && match[1]) return match[1];
+    }
+    return null;
+}
+
+async function processYoutubeUrl() {
+    const input = document.getElementById('youtube-url-input');
+    const inputBox = document.getElementById('youtube-input-box');
+    const btn = document.getElementById('btn-paste-url');
+    const loading = document.getElementById('youtube-loading');
+    const error = document.getElementById('youtube-error');
+    const confirmation = document.getElementById('youtube-confirmation');
+    const inputWrapper = document.getElementById('youtube-input-wrapper');
+
+    if (youtubeConfirmed) return;
+
+    let url = input.value.trim();
+    if (!url && navigator.clipboard && navigator.clipboard.readText) {
+        try {
+            const clipText = await navigator.clipboard.readText();
+            if (clipText) {
+                input.value = clipText.trim();
+                url = clipText.trim();
+            }
+        } catch (e) {}
+    }
+
+    error.classList.remove('active');
+    confirmation.classList.remove('active');
+    inputBox.classList.remove('error');
+
+    if (!url) {
+        inputBox.classList.add('error');
+        document.getElementById('youtube-error-text').textContent = 'Cole ou digite um link do YouTube';
+        error.classList.add('active');
+        return;
+    }
+
+    const videoId = extractYoutubeId(url);
+    if (!videoId) {
+        inputBox.classList.add('error');
+        document.getElementById('youtube-error-text').textContent = 'Insira um link válido do YouTube';
+        error.classList.add('active');
+        return;
+    }
+
+    btn.classList.add('loading');
+    btn.innerHTML = '<span class="btn-spinner"></span>Processando';
+    loading.classList.add('active');
+
+    try {
+        let title = 'Vídeo do YouTube';
+        try {
+            const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
+            const response = await fetch(oembedUrl, { method: 'GET' });
+            if (response.ok) {
+                const data = await response.json();
+                if (data.title) title = data.title;
+            }
+        } catch (fetchErr) {
+            console.warn('Não foi possível buscar o título:', fetchErr);
+        }
+
+        currentYoutubeData = {
+            id: videoId,
+            title: title,
+            thumbnail: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+            url: url
+        };
+
+        document.getElementById('youtube-thumb').src = currentYoutubeData.thumbnail;
+        document.getElementById('youtube-title').textContent = currentYoutubeData.title;
+        document.getElementById('youtube-meta').textContent = `youtu.be/${videoId}`;
+
+        loading.classList.remove('active');
+        confirmation.classList.add('active');
+        // ESCONDE O INPUT APÓS VALIDAÇÃO
+        inputWrapper.classList.add('hidden');
+
+        showToast('Vídeo encontrado! Clique no ✓ para confirmar', 'success');
+
+        // Já ativa o botão Avançar assim que o vídeo é validado
+        updateNextButton();
+
+    } catch (err) {
+        console.error('Erro ao processar URL:', err);
+        loading.classList.remove('active');
+        document.getElementById('youtube-error-text').textContent = 'Erro ao processar. Tente novamente';
+        error.classList.add('active');
+    } finally {
+        btn.classList.remove('loading');
+        btn.textContent = 'Colar URL';
+    }
+}
+
+function confirmYoutubeSelection() {
+    if (!currentYoutubeData) return;
+    youtubeConfirmed = true;
+    const checkBtn = document.getElementById('youtube-check-btn');
+    checkBtn.style.transform = 'scale(1.1)';
+    setTimeout(() => { checkBtn.style.transform = 'scale(1)'; }, 200);
+    updateNextButton();
+    showToast('Vídeo confirmado! Pode avançar', 'success');
+}
+
+function resetYoutube() {
+    youtubeConfirmed = false;
+    currentYoutubeData = null;
+    const input = document.getElementById('youtube-url-input');
+    const loading = document.getElementById('youtube-loading');
+    const error = document.getElementById('youtube-error');
+    const confirmation = document.getElementById('youtube-confirmation');
+    const inputBox = document.getElementById('youtube-input-box');
+    const inputWrapper = document.getElementById('youtube-input-wrapper');
+    const btn = document.getElementById('btn-paste-url');
+    if (input) input.value = '';
+    if (loading) loading.classList.remove('active');
+    if (error) error.classList.remove('active');
+    if (confirmation) confirmation.classList.remove('active');
+    if (inputBox) inputBox.classList.remove('error');
+    if (inputWrapper) inputWrapper.classList.remove('hidden'); // MOSTRA INPUT DE VOLTA
+    if (btn) { btn.classList.remove('loading'); btn.textContent = 'Colar URL'; }
+    updateNextButton();
+}
+
+/* =========================================================
+   ATUALIZAR BOTÃO AVANÇAR
+   ========================================================= */
+function updateNextButton() {
+    if (!coverBtnNext) return;
+    const activeTab = document.querySelector('.cover-audio-tab.active')?.dataset.coverTab;
+    let enabled = false;
+
+    if (activeTab === 'audio') {
+        const hasRecent = document.querySelector('.recent-audio-item.selected');
+        enabled = !!currentYoutubeData || selectedCoverAudio || !!hasRecent;
+    } else if (activeTab === 'tts') {
+        const text = document.getElementById('cover-tts-text')?.value.trim();
+        enabled = !!(text && text.length > 0);
+    } else if (activeTab === 'record') {
+        const timer = document.getElementById('cover-record-timer')?.textContent || '00:00';
+        enabled = timer !== '00:00';
+    }
+
+    coverBtnNext.disabled = !enabled;
+}
+
+/* =========================================================
+   STEPPER
+   ========================================================= */
+function resetStepper() {
+    const steps = document.querySelectorAll('.cover-step');
+    if (steps.length < 3) return;
+
+    // Step 1: Voz (completed)
+    steps[0].classList.remove('active');
+    steps[0].classList.add('completed');
+    steps[0].querySelector('.cover-step-circle').innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+
+    // Step 2: Áudio (active)
+    steps[1].classList.remove('completed');
+    steps[1].classList.add('active');
+    steps[1].querySelector('.cover-step-circle').textContent = '2';
+
+    // Step 3: Ajustes (inactive)
+    steps[2].classList.remove('active', 'completed');
+    steps[2].querySelector('.cover-step-circle').textContent = '3';
+
+    // Conectores
+    const connectors = document.querySelectorAll('.cover-step-connector');
+    if (connectors[0]) connectors[0].classList.add('completed');
+    if (connectors[1]) connectors[1].classList.remove('completed');
+}
+
+function goToStep3() {
+    const steps = document.querySelectorAll('.cover-step');
+    if (steps.length < 3) return;
+
+    // Step 2: completed
+    steps[1].classList.remove('active');
+    steps[1].classList.add('completed');
+    steps[1].querySelector('.cover-step-circle').innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+
+    // Step 3: active
+    steps[2].classList.add('active');
+    steps[2].querySelector('.cover-step-circle').textContent = '3';
+
+    // Conectores
+    const connectors = document.querySelectorAll('.cover-step-connector');
+    if (connectors[1]) connectors[1].classList.add('completed');
+
+    currentStep = 3;
+}
+
+/* =========================================================
+   AVANÇAR — Transição para Etapa 3
+   ========================================================= */
+function advanceCoverStep() {
+    if (coverBtnNext.disabled) return;
+
+    // Se já está no Step 3, não faz nada
+    if (currentStep === 3) return;
+
+    // Transição visual para o Step 3
+    goToStep3();
+
+    // Mostra overlay "A gerar..."
+    generatingOverlay.classList.add('active');
+
+    // Simula processamento
+    setTimeout(() => {
+        generatingOverlay.classList.remove('active');
+        closeCoverModal();
+        showToast('Cover gerado com sucesso!', 'success');
+    }, 2000);
+}
+
+/* =========================================================
+   LISTENERS AUXILIARES
+   ========================================================= */
+document.getElementById('youtube-url-input')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        processYoutubeUrl();
+    }
+});
+
+function selectRecentAudio(el, name) {
+    document.querySelectorAll('.recent-audio-item').forEach(i => i.classList.remove('selected'));
+    el.classList.add('selected');
+    showToast(`"${name}" selecionado`, 'success');
+    updateNextButton();
+}
+
+const coverUploadZone = document.getElementById('cover-upload-zone');
+const coverFileInput = document.getElementById('cover-file-input');
+let selectedCoverAudio = false;
+function handleCoverAudioFile(file) {
+    if (!file) return;
+    selectedCoverAudio = false;
+    coverUploadZone.querySelector('p').textContent = 'Arraste ou selecione um arquivo de áudio';
+    coverUploadZone.style.borderColor = '';
+    coverUploadZone.style.background = '';
+    const validAudio = /^audio\/(mpeg|mp3|wav|x-wav|wave|mp4|flac)$/.test(file.type) || /\.(mp3|wav|m4a|flac)$/i.test(file.name);
+    if (!validAudio) {
+        coverFileInput.value = '';
+        updateNextButton();
+        showToast('Escolha um arquivo de áudio MP3, WAV, M4A ou FLAC.', 'danger');
+        return;
+    }
+    if (file.size > 50 * 1024 * 1024) {
+        coverFileInput.value = '';
+        updateNextButton();
+        showToast('O arquivo de áudio deve ter no máximo 50 MB.', 'danger');
+        return;
+    }
+    selectedCoverAudio = true;
+    coverUploadZone.querySelector('p').textContent = '✓ ' + file.name;
+    coverUploadZone.style.borderColor = 'var(--success)';
+    coverUploadZone.style.background = 'var(--accent-purple-light)';
+    showToast('Áudio pronto para usar!', 'success');
+    updateNextButton();
+}
+if (coverUploadZone && coverFileInput) {
+    coverUploadZone.addEventListener('click', () => coverFileInput.click());
+    coverUploadZone.addEventListener('dragover', event => { event.preventDefault(); coverUploadZone.classList.add('dragover'); });
+    coverUploadZone.addEventListener('dragleave', () => coverUploadZone.classList.remove('dragover'));
+    coverUploadZone.addEventListener('drop', event => {
+        event.preventDefault();
+        coverUploadZone.classList.remove('dragover');
+        handleCoverAudioFile(event.dataTransfer.files[0]);
+    });
+    coverFileInput.addEventListener('change', () => handleCoverAudioFile(coverFileInput.files[0]));
+}
+
+document.getElementById('cover-tts-text')?.addEventListener('input', function() {
+    document.getElementById('cover-tts-counter').textContent = `${this.value.length} / 1000 caracteres`;
+    updateNextButton();
+});
+
+let coverRecording = false, coverRecordInterval = null, coverRecordSeconds = 0;
+function toggleCoverRecording() {
+    coverRecording = !coverRecording;
+    const circle = document.getElementById('cover-record-circle');
+    const timer = document.getElementById('cover-record-timer');
+    const hint = document.getElementById('cover-record-hint');
+    if (coverRecording) {
+        circle.classList.add('recording');
+        hint.textContent = 'Gravando... Clique novamente para parar';
+        coverRecordSeconds = 0;
+        coverRecordInterval = setInterval(() => {
+            coverRecordSeconds++;
+            const m = Math.floor(coverRecordSeconds / 60);
+            const s = coverRecordSeconds % 60;
+            timer.textContent = `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+            updateNextButton();
+        }, 1000);
+    } else {
+        circle.classList.remove('recording');
+        hint.textContent = 'Clique no microfone para começar a gravar';
+        clearInterval(coverRecordInterval);
+        updateNextButton();
+    }
+}
+
+/* =========================================================
+   PERFIL
+   ========================================================= */
+const socialLoginModal = document.getElementById('social-login-modal');
+function openLoginModal() {
+    profileDropdown.classList.remove('active');
+    socialLoginModal.classList.add('active');
+}
+function closeLoginModal() {
+    socialLoginModal.classList.remove('active');
+}
+async function startSocialLogin(provider) {
+    if (provider !== 'Discord') {
+        showToast(`Login com ${provider} ainda não está configurado.`, 'danger');
+        return;
+    }
+    try {
+        const currentUrl = new URL(window.location.href);
+        const currentFile = decodeURIComponent(currentUrl.pathname.split('/').pop() || '');
+        const redirectUrl = currentFile.toLowerCase().endsWith('.html')
+            ? currentUrl
+            : new URL(APP_ENTRY_FILE, `${currentUrl.origin}/`);
+        redirectUrl.search = '';
+        redirectUrl.hash = '';
+        const { error } = await supabaseClient.auth.signInWithOAuth({
+            provider: 'discord',
+            options: {
+                redirectTo: redirectUrl.toString()
+            }
+        });
+        if (error) {
+            console.error('Não foi possível iniciar o login com Discord:', error);
+            showToast('Não foi possível iniciar o login com Discord.', 'danger');
+        }
+    } catch (error) {
+        console.error('Não foi possível iniciar o login com Discord:', error);
+        showToast('Não foi possível iniciar o login com Discord.', 'danger');
+    }
+}
+socialLoginModal.addEventListener('click', event => {
+    if (event.target === socialLoginModal) closeLoginModal();
+});
+document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && socialLoginModal.classList.contains('active')) closeLoginModal();
+    if (event.key === 'Escape' && importModal.classList.contains('active')) closeImportModal();
+});
+
+function applyTheme(isDark) {
+    document.body.classList.toggle('dark-mode', isDark);
+    document.getElementById('theme-label').textContent = isDark ? 'Modo claro' : 'Modo escuro';
+    const icon = document.getElementById('theme-icon');
+    icon.innerHTML = isDark
+        ? '<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/>'
+        : '<path d="M12 3a6 6 0 0 0 9 5.2A9 9 0 1 1 15.8 3 6 6 0 0 0 12 3z"/>';
+}
+function toggleTheme() {
+    const isDark = !document.body.classList.contains('dark-mode');
+    localStorage.setItem('weightsTheme', isDark ? 'dark' : 'light');
+    applyTheme(isDark);
+}
+applyTheme(localStorage.getItem('weightsTheme') === 'dark');
+
+const userAvatar = document.getElementById('user-avatar');
+const profileDropdown = document.getElementById('profile-dropdown');
+const dropdownAvatar = document.getElementById('dropdown-avatar');
+const profileContainer = document.getElementById('profile-logged-in');
+const loginButton = document.getElementById('login-button');
+const profileName = document.getElementById('user-name');
+const profileStatus = document.getElementById('user-status');
+let currentUser = null;
+let authInitialized = false;
+
+function updateAuthUI() {
+    const isLoggedIn = Boolean(currentUser);
+    profileContainer.hidden = !isLoggedIn;
+    loginButton.hidden = !authInitialized || isLoggedIn;
+    if (!isLoggedIn) {
+        profileDropdown.classList.remove('active');
+        return;
+    }
+    profileName.textContent = currentUser.name;
+    profileStatus.textContent = 'Logado';
+    userAvatar.src = currentUser.avatar;
+    dropdownAvatar.src = currentUser.avatar;
+}
+
+updateAuthUI();
+
+function syncAuthUser(user) {
+    authInitialized = true;
+    if (!user) {
+        currentUser = null;
+        updateAuthUI();
+        return;
+    }
+    const discordIdentity = user.identities?.find(identity => identity.provider === 'discord');
+    const metadata = { ...(discordIdentity?.identity_data || {}), ...(user.user_metadata || {}) };
+    const name = metadata.global_name
+        || metadata.full_name
+        || metadata.name
+        || metadata.preferred_username
+        || metadata.username
+        || user.email?.split('@')[0]
+        || 'Usuário Discord';
+    currentUser = {
+        id: user.id,
+        name,
+        avatar: metadata.avatar_url || metadata.picture || generateFallbackImage(name)
+    };
+    updateAuthUI();
+}
+
+supabaseClient.auth.onAuthStateChange((_event, session) => {
+    syncAuthUser(session?.user || null);
+});
+
+async function loadAuthSession() {
+    try {
+        const callbackUrl = new URL(window.location.href);
+        const authorizationCode = callbackUrl.searchParams.get('code');
+        if (authorizationCode) {
+            const { data, error } = await supabaseClient.auth.exchangeCodeForSession(authorizationCode);
+            if (error) throw error;
+            callbackUrl.searchParams.delete('code');
+            callbackUrl.searchParams.delete('state');
+            window.history.replaceState({}, document.title, callbackUrl.toString());
+            syncAuthUser(data.session?.user || null);
+            return;
+        }
+
+        const authError = callbackUrl.searchParams.get('error_description')
+            || callbackUrl.searchParams.get('error');
+        if (authError) {
+            callbackUrl.searchParams.delete('error');
+            callbackUrl.searchParams.delete('error_description');
+            callbackUrl.searchParams.delete('error_code');
+            window.history.replaceState({}, document.title, callbackUrl.toString());
+            throw new Error(authError);
+        }
+
+        const { data, error } = await supabaseClient.auth.getSession();
+        if (error) {
+            throw error;
+        }
+        syncAuthUser(data.session?.user || null);
+    } catch (error) {
+        console.error('Não foi possível concluir a autenticação do Supabase:', error);
+        authInitialized = true;
+        updateAuthUI();
+        showToast(`Não foi possível concluir o login: ${error.message || 'verifique a configuração OAuth e tente novamente.'}`, 'danger');
+    }
+}
+loadAuthSession();
+
+userAvatar.addEventListener('click', e => {
+    e.stopPropagation();
+    profileDropdown.classList.toggle('active');
+});
+document.addEventListener('click', e => {
+    if (!profileDropdown.contains(e.target) && e.target !== userAvatar) {
+        profileDropdown.classList.remove('active');
+    }
+});
+
+async function handleLogout() {
+    try {
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) {
+            console.error('Não foi possível encerrar a sessão do Supabase:', error);
+            showToast('Não foi possível sair da conta.', 'danger');
+            return;
+        }
+        currentUser = null;
+        localStorage.removeItem('weightsUser');
+        profileDropdown.classList.remove('active');
+        updateAuthUI();
+        showToast('Você saiu da sua conta.', 'success');
+    } catch (error) {
+        console.error('Não foi possível encerrar a sessão do Supabase:', error);
+        showToast('Não foi possível sair da conta.', 'danger');
+    }
+}
+
+/* ALTERAR FOTO */
+const changePhotoModal = document.getElementById('change-photo-modal');
+const photoPreview = document.getElementById('photo-preview');
+const photoUrlInput = document.getElementById('photo-url-input');
+const photoFileInput = document.getElementById('photo-file-input');
+const btnChangePhoto = document.getElementById('btn-change-photo');
+const btnSavePhoto = document.getElementById('btn-save-photo');
+let newPhotoData = null;
+
+function openChangePhotoModal() {
+    newPhotoData = null;
+    photoUrlInput.value = '';
+    photoFileInput.value = '';
+    photoPreview.src = currentUser.avatar;
+    changePhotoModal.classList.add('active');
+    profileDropdown.classList.remove('active');
+}
+function closeChangePhotoModal() {
+    changePhotoModal.classList.remove('active');
+    newPhotoData = null;
+}
+btnChangePhoto.addEventListener('click', openChangePhotoModal);
+changePhotoModal.addEventListener('click', e => {
+    if (e.target === changePhotoModal) closeChangePhotoModal();
+});
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && changePhotoModal.classList.contains('active')) closeChangePhotoModal();
+});
+photoUrlInput.addEventListener('input', e => {
+    const url = e.target.value.trim();
+    if (url) {
+        newPhotoData = url;
+        photoPreview.src = url;
+        photoPreview.onerror = () => { photoPreview.src = currentUser.avatar; newPhotoData = null; };
+    } else {
+        photoPreview.src = currentUser.avatar;
+        newPhotoData = null;
+    }
+});
+photoFileInput.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { showToast('Máx 2MB.', 'danger'); return; }
+    const reader = new FileReader();
+    reader.onload = event => { newPhotoData = event.target.result; photoPreview.src = newPhotoData; photoUrlInput.value = ''; };
+    reader.readAsDataURL(file);
+});
+btnSavePhoto.addEventListener('click', () => {
+    if (!newPhotoData) { showToast('Escolha uma imagem primeiro.', 'danger'); return; }
+    currentUser.avatar = newPhotoData;
+    localStorage.setItem('weightsUser', JSON.stringify(currentUser));
+    userAvatar.src = newPhotoData;
+    dropdownAvatar.src = newPhotoData;
+    closeChangePhotoModal();
+    showToast('Foto de perfil atualizada!', 'success');
+});
+
+/* TOAST */
+let toastTimeout = null;
+function showToast(message, type = 'danger') {
+    let toast = document.getElementById('toast-notif');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast-notif';
+        toast.className = 'toast-notif';
+        document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.className = 'toast-notif active ' + (type === 'success' ? 'success' : 'danger');
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => toast.classList.remove('active'), 2500);
+}
+
+/* IDIOMA */
+const settingsBtn = document.getElementById('settings-btn');
+const settingsDropdown = document.getElementById('settings-dropdown');
+settingsBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    settingsDropdown.classList.toggle('active');
+    settingsBtn.classList.toggle('active');
+});
+document.addEventListener('click', (e) => {
+    if (!settingsDropdown.contains(e.target) && e.target !== settingsBtn) {
+        settingsDropdown.classList.remove('active');
+        settingsBtn.classList.remove('active');
+    }
+});
+function setLanguage(lang) {
+    document.querySelectorAll('.settings-option').forEach(opt => {
+        opt.classList.toggle('active', opt.dataset.lang === lang);
+    });
+    settingsDropdown.classList.remove('active');
+    settingsBtn.classList.remove('active');
+    localStorage.setItem('weightsLanguage', lang);
+    const langNames = { pt: 'Português', en: 'English', es: 'Español' };
+    showToast(`Idioma alterado para ${langNames[lang]}`, 'success');
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    loadVoiceModels();
+    updateNextButton();
+    resetStepper();
+    console.log('🎉 Weights Revival pronto!');
+});
+</script>
 </body>
-    </html>
+</html>
