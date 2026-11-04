@@ -1086,8 +1086,8 @@ const supabaseClient = window.supabase.createClient(
     SUPABASE_ANON_KEY,
     {
         auth: {
-            flowType: 'pkce',
-            detectSessionInUrl: false,
+            flowType: 'implicit',
+            detectSessionInUrl: true,
             persistSession: true,
             autoRefreshToken: true
         }
@@ -1972,7 +1972,8 @@ async function startSocialLogin(provider) {
         const { error } = await supabaseClient.auth.signInWithOAuth({
             provider: 'discord',
             options: {
-                redirectTo: redirectUrl.toString()
+                redirectTo: redirectUrl.toString(),
+                skipBrowserRedirect: false
             }
         });
         if (error) {
@@ -2033,6 +2034,45 @@ function updateAuthUI() {
 
 updateAuthUI();
 
+function cleanOAuthCallbackUrl() {
+    const callbackUrl = new URL(window.location.href);
+    const authParams = [
+        'code',
+        'state',
+        'error',
+        'error_description',
+        'error_code',
+        'access_token',
+        'refresh_token',
+        'expires_at',
+        'expires_in',
+        'token_type',
+        'provider_token',
+        'provider_refresh_token'
+    ];
+    let changed = false;
+
+    authParams.forEach(param => {
+        if (callbackUrl.searchParams.has(param)) {
+            callbackUrl.searchParams.delete(param);
+            changed = true;
+        }
+    });
+
+    if (callbackUrl.hash) {
+        const hashParams = new URLSearchParams(callbackUrl.hash.slice(1));
+        if (authParams.some(param => hashParams.has(param))) {
+            authParams.forEach(param => hashParams.delete(param));
+            callbackUrl.hash = hashParams.toString();
+            changed = true;
+        }
+    }
+
+    if (changed) {
+        window.history.replaceState({}, document.title, callbackUrl.toString());
+    }
+}
+
 function syncAuthUser(user) {
     authInitialized = true;
     if (!user) {
@@ -2054,6 +2094,7 @@ function syncAuthUser(user) {
         name,
         avatar: metadata.avatar_url || metadata.picture || generateFallbackImage(name)
     };
+    cleanOAuthCallbackUrl();
     updateAuthUI();
 }
 
@@ -2064,24 +2105,10 @@ supabaseClient.auth.onAuthStateChange((_event, session) => {
 async function loadAuthSession() {
     try {
         const callbackUrl = new URL(window.location.href);
-        const authorizationCode = callbackUrl.searchParams.get('code');
-        if (authorizationCode) {
-            const { data, error } = await supabaseClient.auth.exchangeCodeForSession(authorizationCode);
-            if (error) throw error;
-            callbackUrl.searchParams.delete('code');
-            callbackUrl.searchParams.delete('state');
-            window.history.replaceState({}, document.title, callbackUrl.toString());
-            syncAuthUser(data.session?.user || null);
-            return;
-        }
-
         const authError = callbackUrl.searchParams.get('error_description')
             || callbackUrl.searchParams.get('error');
         if (authError) {
-            callbackUrl.searchParams.delete('error');
-            callbackUrl.searchParams.delete('error_description');
-            callbackUrl.searchParams.delete('error_code');
-            window.history.replaceState({}, document.title, callbackUrl.toString());
+            cleanOAuthCallbackUrl();
             throw new Error(authError);
         }
 
@@ -2090,6 +2117,10 @@ async function loadAuthSession() {
             throw error;
         }
         syncAuthUser(data.session?.user || null);
+        if (!data.session && callbackUrl.searchParams.has('code')) {
+            cleanOAuthCallbackUrl();
+            showToast('O retorno do login está usando um código PKCE antigo. Inicie o login novamente.', 'danger');
+        }
     } catch (error) {
         console.error('Não foi possível concluir a autenticação do Supabase:', error);
         authInitialized = true;
