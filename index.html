@@ -566,7 +566,7 @@ body.dark-mode .cover-upload-zone[style*="rgb(16, 185, 129)"] { background: #173
     </div>
     <div class="nav-group">
         <div class="section-title">CRIAÇÃO RÁPIDA</div>
-        <button class="nav-item">
+        <button class="nav-item" data-target="view-cover-de-voz">
             <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
             <span>Cover de Voz</span>
         </button>
@@ -807,7 +807,15 @@ body.dark-mode .cover-upload-zone[style*="rgb(16, 185, 129)"] { background: #173
 
         <div id="favoritos" class="tab-pane">
             <div class="page-header"><h1>Favoritos</h1><p>Seus modelos favoritos</p></div>
-            <div style="text-align:center;padding:80px 0;color:var(--text-muted)"><h3>Nenhum favorito</h3></div>
+            <div class="grid" id="favorites-grid"></div>
+        </div>
+
+        <div id="view-cover-de-voz" class="tab-pane">
+            <div class="page-header">
+                <h1>Cover de Voz</h1>
+                <p>Escolha um modelo para começar a criar seu cover</p>
+            </div>
+            <div class="grid" id="cover-models-grid"></div>
         </div>
 
         <div id="colecoes" class="tab-pane">
@@ -1100,6 +1108,12 @@ const supabaseClient = window.supabase.createClient(
 let models = [];
 let modelsLoading = true;
 let modelsLoadError = false;
+let favoriteModelIds = new Set();
+let favoritePendingIds = new Set();
+let favoritesLoading = false;
+let favoritesLoadError = '';
+let favoriteLoadRequest = 0;
+let favoritesForUserId = null;
 
 function escapeHTML(value) {
     return String(value ?? '').replace(/[&<>"']/g, char => ({
@@ -1126,11 +1140,13 @@ function renderModels() {
     grid.innerHTML = '';
     if (modelsLoading) {
         grid.innerHTML = '<div class="empty-models">Carregando modelos de voz...</div>';
+        renderSupplementaryModelViews();
         return;
     }
     if (modelsLoadError) {
         grid.innerHTML = '<div class="empty-models">Não foi possível carregar os modelos. Verifique a conexão e tente novamente.<br><button class="use-btn" id="retry-models-load" type="button" style="margin: 16px auto 0;">Tentar novamente</button></div>';
         grid.querySelector('#retry-models-load').addEventListener('click', loadVoiceModels);
+        renderSupplementaryModelViews();
         return;
     }
     const searchTerm = (document.getElementById('model-search')?.value || '').trim().toLowerCase();
@@ -1148,13 +1164,20 @@ function renderModels() {
         if (activeFilter === 'recent') return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
         return 0;
     });
-    visibleModels.forEach(model => {
+    renderModelCards(grid, visibleModels);
+    if (!visibleModels.length) grid.innerHTML = '<div class="empty-models">Nenhum modelo encontrado. Tente outro filtro ou termo de busca.</div>';
+    renderSupplementaryModelViews();
+}
+
+function renderModelCards(grid, modelList) {
+    grid.innerHTML = '';
+    modelList.forEach(model => {
         const card = document.createElement('div');
         card.className = 'card';
         card.setAttribute('data-id', escapeHTML(model.id));
-        const tagsHtml = model.tags.map(tag => `<span class="tag">${escapeHTML(tag)}</span>`).join('');
-        const isLiked = localStorage.getItem(`liked_${model.id}`) === 'true';
-        const likedClass = isLiked ? 'liked' : '';
+        const tagsHtml = (Array.isArray(model.tags) ? model.tags : []).map(tag => `<span class="tag">${escapeHTML(tag)}</span>`).join('');
+        const isFavorite = favoriteModelIds.has(String(model.id));
+        const likedClass = isFavorite ? 'liked' : '';
         const fallbackImg = escapeHTML(generateFallbackImage(model.name));
         card.innerHTML = `
             <button class="delete-btn" type="button" title="Excluir" aria-label="Excluir modelo">
@@ -1176,7 +1199,7 @@ function renderModels() {
                 <div class="model-meta"><span class="model-usage"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9 9 9 0 0 0-9-9zm1 4v5.4l3.2 1.9-1 1.7L11 13.5V7z"/></svg>${formatCount(model.uses)} usos</span></div>
                 <div class="card-footer">
                     <div class="card-footer-actions">
-                        <button class="likes ${likedClass}" type="button" aria-label="Curtir modelo">
+                        <button class="likes ${likedClass}" type="button" aria-label="${isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}" aria-pressed="${isFavorite}">
                             <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                             <span class="like-count">${formatCount(model.likes)}</span>
                         </button>
@@ -1196,11 +1219,74 @@ function renderModels() {
         if (model.audioUrl) {
             card.querySelector('.play-button').addEventListener('click', event => togglePlay(model.id, event.currentTarget));
         }
-        card.querySelector('.likes').addEventListener('click', event => toggleLike(model.id, event.currentTarget));
+        card.querySelector('.likes').addEventListener('click', () => toggleFavorite(model.id));
         card.querySelector('.use-btn').addEventListener('click', () => openCoverModal(model.id));
         grid.appendChild(card);
     });
-    if (!visibleModels.length) grid.innerHTML = '<div class="empty-models">Nenhum modelo encontrado. Tente outro filtro ou termo de busca.</div>';
+}
+
+function renderSupplementaryModelViews() {
+    renderFavorites();
+    renderCoverModels();
+}
+
+function getFavoritesErrorMessage(error) {
+    if (error?.code === 'PGRST205') {
+        return 'A tabela favorites ainda não existe no Supabase. Execute o arquivo favorites.sql no SQL Editor do projeto.';
+    }
+    if (error?.code === '42501') {
+        return 'O Supabase bloqueou o acesso aos favoritos. Confira as políticas RLS da tabela favorites.';
+    }
+    return 'Não foi possível acessar a tabela favorites. Confira a tabela e as políticas de acesso no Supabase.';
+}
+
+function renderFavorites() {
+    const grid = document.getElementById('favorites-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    if (!currentUser) {
+        grid.innerHTML = '<div class="empty-models">Entre na sua conta para ver seus favoritos.<br><button class="use-btn" type="button" style="margin: 16px auto 0;" onclick="openLoginModal()">Entrar</button></div>';
+        return;
+    }
+    if (favoritesLoading || modelsLoading) {
+        grid.innerHTML = '<div class="empty-models">Carregando favoritos...</div>';
+        return;
+    }
+    if (favoritesLoadError) {
+        grid.innerHTML = `<div class="empty-models">${escapeHTML(favoritesLoadError)}<br><button class="use-btn" type="button" style="margin: 16px auto 0;" onclick="loadFavorites()">Tentar novamente</button></div>`;
+        return;
+    }
+    if (modelsLoadError) {
+        grid.innerHTML = '<div class="empty-models">Não foi possível carregar os modelos favoritados. Tente novamente mais tarde.</div>';
+        return;
+    }
+    const modelsById = new Map(models.map(model => [String(model.id), model]));
+    const favoriteModels = [...favoriteModelIds]
+        .map(id => modelsById.get(id))
+        .filter(Boolean);
+    if (!favoriteModels.length) {
+        grid.innerHTML = '<div class="empty-models">Nenhum favorito ainda. Toque no coração de um modelo para salvá-lo aqui.</div>';
+        return;
+    }
+    renderModelCards(grid, favoriteModels);
+}
+
+function renderCoverModels() {
+    const grid = document.getElementById('cover-models-grid');
+    if (!grid) return;
+    if (modelsLoading) {
+        grid.innerHTML = '<div class="empty-models">Carregando modelos de voz...</div>';
+        return;
+    }
+    if (modelsLoadError) {
+        grid.innerHTML = '<div class="empty-models">Não foi possível carregar os modelos. Volte à aba Voice Models e tente novamente.</div>';
+        return;
+    }
+    if (!models.length) {
+        grid.innerHTML = '<div class="empty-models">Nenhum modelo de voz disponível para criar um cover.</div>';
+        return;
+    }
+    renderModelCards(grid, models);
 }
 
 function normalizeVoiceModel(row) {
@@ -1245,14 +1331,89 @@ async function loadVoiceModels() {
     }
 }
 
-function toggleLike(id, el) {
-    const isLiked = el.classList.toggle('liked');
-    localStorage.setItem(`liked_${id}`, isLiked);
-    const model = models.find(m => m.id === id);
-    if (model) {
-        model.likes = Math.max(0, Number(model.likes || 0) + (isLiked ? 1 : -1));
-        el.querySelector('.like-count').textContent = formatCount(model.likes);
-        localStorage.setItem('weightsModels', JSON.stringify(models));
+async function loadFavorites() {
+    const requestId = ++favoriteLoadRequest;
+    const userId = currentUser?.id;
+    if (!userId) {
+        favoriteModelIds.clear();
+        favoritesForUserId = null;
+        favoritesLoading = false;
+        favoritesLoadError = '';
+        renderFavorites();
+        return;
+    }
+    if (favoritesForUserId !== userId) {
+        favoriteModelIds.clear();
+        favoritesForUserId = userId;
+    }
+
+    favoritesLoading = true;
+    favoritesLoadError = '';
+    renderFavorites();
+    try {
+        const { data, error } = await supabaseClient
+            .from('favorites')
+            .select('model_id')
+            .eq('user_id', userId);
+        if (error) throw error;
+        if (!Array.isArray(data)) throw new Error('Resposta inválida ao carregar favoritos.');
+        if (requestId !== favoriteLoadRequest || currentUser?.id !== userId) return;
+        favoriteModelIds = new Set(data.map(favorite => String(favorite.model_id)));
+        favoritesLoadError = '';
+    } catch (error) {
+        if (requestId !== favoriteLoadRequest || currentUser?.id !== userId) return;
+        console.error('Não foi possível carregar os favoritos do Supabase:', error);
+        favoritesLoadError = getFavoritesErrorMessage(error);
+        showToast(favoritesLoadError, 'danger');
+    } finally {
+        if (requestId === favoriteLoadRequest && currentUser?.id === userId) {
+            favoritesLoading = false;
+            renderModels();
+        }
+    }
+}
+
+async function toggleFavorite(id) {
+    const modelId = String(id);
+    if (!currentUser) {
+        showToast('Entre na sua conta para salvar modelos favoritos.', 'danger');
+        openLoginModal();
+        return;
+    }
+    if (favoritesLoading) {
+        showToast('Aguarde o carregamento dos seus favoritos.', 'danger');
+        return;
+    }
+    if (favoritePendingIds.has(modelId)) return;
+
+    const userId = currentUser.id;
+    const removing = favoriteModelIds.has(modelId);
+    favoritePendingIds.add(modelId);
+    document.querySelectorAll(`.card[data-id="${CSS.escape(modelId)}"] .likes`).forEach(button => {
+        button.disabled = true;
+    });
+
+    try {
+        const query = supabaseClient.from('favorites');
+        const { error } = removing
+            ? await query.delete().eq('user_id', userId).eq('model_id', modelId)
+            : await query.upsert(
+                { user_id: userId, model_id: modelId },
+                { onConflict: 'user_id,model_id', ignoreDuplicates: true }
+            );
+        if (error) throw error;
+        if (currentUser?.id !== userId) return;
+
+        if (removing) favoriteModelIds.delete(modelId);
+        else favoriteModelIds.add(modelId);
+        renderModels();
+        showToast(removing ? 'Modelo removido dos favoritos.' : 'Modelo adicionado aos favoritos.', 'success');
+    } catch (error) {
+        console.error('Não foi possível atualizar os favoritos no Supabase:', error);
+        showToast(getFavoritesErrorMessage(error), 'danger');
+    } finally {
+        favoritePendingIds.delete(modelId);
+        if (currentUser?.id === userId) renderModels();
     }
 }
 
@@ -1335,6 +1496,7 @@ function switchTab(targetId) {
     if (activeNav) activeNav.classList.add('active');
     const targetTab = document.getElementById(targetId);
     if (targetTab) targetTab.classList.add('active');
+    if (targetId === 'favoritos') loadFavorites();
 }
 
 document.querySelectorAll('.nav-item[data-target]').forEach(item => {
@@ -2077,7 +2239,13 @@ function syncAuthUser(user) {
     authInitialized = true;
     if (!user) {
         currentUser = null;
+        favoriteLoadRequest++;
+        favoriteModelIds.clear();
+        favoritesForUserId = null;
+        favoritesLoading = false;
+        favoritesLoadError = '';
         updateAuthUI();
+        renderModels();
         return;
     }
     const discordIdentity = user.identities?.find(identity => identity.provider === 'discord');
@@ -2096,6 +2264,8 @@ function syncAuthUser(user) {
     };
     cleanOAuthCallbackUrl();
     updateAuthUI();
+    loadFavorites();
+    renderModels();
 }
 
 supabaseClient.auth.onAuthStateChange((_event, session) => {
@@ -2148,10 +2318,9 @@ async function handleLogout() {
             showToast('Não foi possível sair da conta.', 'danger');
             return;
         }
-        currentUser = null;
+        syncAuthUser(null);
         localStorage.removeItem('weightsUser');
         profileDropdown.classList.remove('active');
-        updateAuthUI();
         showToast('Você saiu da sua conta.', 'success');
     } catch (error) {
         console.error('Não foi possível encerrar a sessão do Supabase:', error);
