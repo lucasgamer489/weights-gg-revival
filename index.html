@@ -1318,12 +1318,26 @@ function normalizeVoiceModel(row) {
         image: row.image_url || '',
         audioUrl: row.audio_url || '',
         uses: Number(row.downloads) || 0,
-        likes: Number(row.likes) || 0,
+        likes: Number(row.favorite_count ?? row.likes) || 0,
         createdAt: row.created_at || null,
         tags: Array.isArray(row.tags) ? row.tags : [],
         ownerId: row.owner_id || null,
         modelFiles: Array.isArray(row.model_files) ? row.model_files : []
     };
+}
+
+async function loadFavoriteCounts(modelIds) {
+    const validModelIds = [...new Set(modelIds)].filter(id =>
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)
+    );
+    if (!validModelIds.length) return new Map();
+
+    const { data, error } = await supabaseClient.rpc('get_favorite_counts', {
+        model_ids: validModelIds
+    });
+    if (error) throw error;
+    if (!Array.isArray(data)) throw new Error('Resposta inválida ao carregar a contagem de favoritos.');
+    return new Map(data.map(row => [String(row.model_id), Number(row.favorite_count) || 0]));
 }
 
 async function loadVoiceModels() {
@@ -1337,6 +1351,16 @@ async function loadVoiceModels() {
         if (error) throw error;
         if (!Array.isArray(data)) throw new Error('Resposta inválida ao carregar os modelos de voz.');
         models = data.map(normalizeVoiceModel);
+        try {
+            const favoriteCounts = await loadFavoriteCounts(models.map(model => model.id));
+            models.forEach(model => {
+                if (favoriteCounts.has(model.id)) model.likes = favoriteCounts.get(model.id);
+                else if (/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(model.id)) model.likes = 0;
+            });
+        } catch (countError) {
+            console.error('Não foi possível carregar as contagens de favoritos do Supabase:', countError);
+            showToast('Não foi possível atualizar as curtidas. Execute novamente o arquivo favorites.sql no Supabase.', 'danger');
+        }
         modelsLoading = false;
         renderModels();
     } catch (error) {
@@ -1428,8 +1452,20 @@ async function toggleFavorite(id) {
 
         if (removing) favoriteModelIds.delete(modelId);
         else favoriteModelIds.add(modelId);
+        const model = models.find(item => item.id === modelId);
+        if (model) model.likes = Math.max(0, Number(model.likes || 0) + (removing ? -1 : 1));
         renderModels();
         showToast(removing ? 'Modelo removido dos favoritos.' : 'Modelo adicionado aos favoritos.', 'success');
+        try {
+            const favoriteCounts = await loadFavoriteCounts([modelId]);
+            if (model && favoriteCounts.has(modelId)) {
+                model.likes = favoriteCounts.get(modelId);
+                renderModels();
+            }
+        } catch (countError) {
+            console.error('Não foi possível sincronizar a contagem de favoritos:', countError);
+            showToast('Favorito salvo, mas a contagem não sincronizou. Execute novamente favorites.sql no Supabase.', 'danger');
+        }
     } catch (error) {
         console.error('Não foi possível atualizar os favoritos no Supabase:', error);
         showToast(getFavoritesErrorMessage(error), 'danger');
