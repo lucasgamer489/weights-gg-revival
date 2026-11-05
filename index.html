@@ -1869,7 +1869,7 @@ chatMessageInput?.addEventListener('keydown', event => {
 });
 
 async function streamCharacterReply(model, conversation, assistantMessage, session) {
-    const response = await fetch(`${SUPABASE_URL}/functions/v1/chat-character`, {
+    const response = await fetch('https://vvlrmoedtuyxakidizhl.supabase.co/functions/v1/chat-character', {
         method: 'POST',
         headers: {
             apikey: SUPABASE_ANON_KEY,
