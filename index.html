@@ -1048,7 +1048,7 @@ body.dark-mode .cover-upload-zone[style*="rgb(16, 185, 129)"] { background: #173
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.73 5.09A19.2 19.2 0 0 0 15 3.62l-.23.47a17.6 17.6 0 0 0-5.54 0L9 3.62a19.2 19.2 0 0 0-4.73 1.47C1.28 9.5.47 13.8.88 18.04a19.4 19.4 0 0 0 5.8 2.94l1.25-2.03a12.6 12.6 0 0 1-1.97-.96l.48-.37c3.8 1.76 7.93 1.76 11.68 0l.49.37c-.64.38-1.3.7-1.98.96l1.25 2.03a19.4 19.4 0 0 0 5.8-2.94c.48-4.92-.81-9.18-3.95-12.95ZM8.7 14.9c-1.14 0-2.08-1.04-2.08-2.32s.91-2.32 2.08-2.32 2.1 1.05 2.08 2.32c0 1.28-.92 2.32-2.08 2.32Zm6.6 0c-1.14 0-2.08-1.04-2.08-2.32s.91-2.32 2.08-2.32 2.1 1.05 2.08 2.32c0 1.28-.91 2.32-2.08 2.32Z"/></svg>
                 Entrar com Discord
             </button>
-            <button class="social-login-button google" type="button" onclick="startSocialLogin('Google')">
+            <button class="social-login-button google" type="button" onclick="startSocialLogin('google')">
                 <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M21.35 12.2c0-.7-.06-1.38-.18-2.03H12v3.84h5.24a4.48 4.48 0 0 1-1.94 2.94v2.4h3.14c1.84-1.7 2.91-4.2 2.91-7.15Z"/><path fill="#34A853" d="M12 21.7c2.63 0 4.83-.87 6.44-2.35l-3.14-2.4c-.87.58-1.98.92-3.3.92-2.54 0-4.69-1.72-5.46-4.03H3.3v2.48A9.72 9.72 0 0 0 12 21.7Z"/><path fill="#FBBC05" d="M6.54 13.84a5.84 5.84 0 0 1 0-3.68V7.68H3.3a9.72 9.72 0 0 0 0 8.64l3.24-2.48Z"/><path fill="#EA4335" d="M12 6.13c1.43 0 2.71.49 3.72 1.47l2.79-2.79A9.32 9.32 0 0 0 12 2.3a9.72 9.72 0 0 0-8.7 5.38l3.24 2.48C7.31 7.85 9.46 6.13 12 6.13Z"/></svg>
                 Continuar com Google
             </button>
@@ -1245,7 +1245,7 @@ const SUPABASE_URL = 'https://vvlrmoedtuyxakidizhl.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_pPXz6iHNxysSueCQZzpP5A_aw8Ych0E';
 const RVC_STORAGE_BUCKET = 'rvc-models';
 const MAX_RVC_FILE_SIZE = 50 * 1024 * 1024;
-const APP_ENTRY_FILE = 'deepseek_html_20261014_92896b (13).html';
+const APP_REDIRECT_URL = 'https://weights-gg-revival.vercel.app/';
 const supabaseClient = window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_ANON_KEY,
@@ -3068,32 +3068,26 @@ function closeLoginModal() {
     socialLoginModal.classList.remove('active');
 }
 async function startSocialLogin(provider) {
-    if (provider !== 'Discord') {
-        showToast(`Login com ${provider} ainda não está configurado.`, 'danger');
+    const authProvider = String(provider).trim().toLowerCase();
+    if (!['discord', 'google'].includes(authProvider)) {
+        showToast(`Login com ${provider} não está disponível.`, 'danger');
         return;
     }
     try {
-        const currentUrl = new URL(window.location.href);
-        const currentFile = decodeURIComponent(currentUrl.pathname.split('/').pop() || '');
-        const redirectUrl = currentFile.toLowerCase().endsWith('.html')
-            ? currentUrl
-            : new URL(APP_ENTRY_FILE, `${currentUrl.origin}/`);
-        redirectUrl.search = '';
-        redirectUrl.hash = '';
         const { error } = await supabaseClient.auth.signInWithOAuth({
-            provider: 'discord',
+            provider: authProvider,
             options: {
-                redirectTo: redirectUrl.toString(),
+                redirectTo: APP_REDIRECT_URL,
                 skipBrowserRedirect: false
             }
         });
         if (error) {
-            console.error('Não foi possível iniciar o login com Discord:', error);
-            showToast('Não foi possível iniciar o login com Discord.', 'danger');
+            console.error(`Não foi possível iniciar o login com ${authProvider}:`, error);
+            showToast(`Não foi possível iniciar o login com ${authProvider === 'google' ? 'Google' : 'Discord'}.`, 'danger');
         }
     } catch (error) {
-        console.error('Não foi possível iniciar o login com Discord:', error);
-        showToast('Não foi possível iniciar o login com Discord.', 'danger');
+        console.error(`Não foi possível iniciar o login com ${authProvider}:`, error);
+        showToast(`Não foi possível iniciar o login com ${authProvider === 'google' ? 'Google' : 'Discord'}.`, 'danger');
     }
 }
 socialLoginModal.addEventListener('click', event => {
