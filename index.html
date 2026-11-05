@@ -1245,7 +1245,7 @@ const SUPABASE_URL = 'https://vvlrmoedtuyxakidizhl.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_pPXz6iHNxysSueCQZzpP5A_aw8Ych0E';
 const RVC_STORAGE_BUCKET = 'rvc-models';
 const MAX_RVC_FILE_SIZE = 50 * 1024 * 1024;
-const APP_REDIRECT_URL = 'https://weights-gg-revival.vercel.app/';
+const APP_REDIRECT_URL = window.location.origin;
 const supabaseClient = window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_ANON_KEY,
@@ -3143,7 +3143,6 @@ function cleanOAuthCallbackUrl() {
     const callbackUrl = new URL(window.location.href);
     const authParams = [
         'code',
-        'state',
         'error',
         'error_description',
         'error_code',
@@ -3219,23 +3218,11 @@ supabaseClient.auth.onAuthStateChange((_event, session) => {
 
 async function loadAuthSession() {
     try {
-        const callbackUrl = new URL(window.location.href);
-        const authError = callbackUrl.searchParams.get('error_description')
-            || callbackUrl.searchParams.get('error');
-        if (authError) {
-            cleanOAuthCallbackUrl();
-            throw new Error(authError);
-        }
-
         const { data, error } = await supabaseClient.auth.getSession();
         if (error) {
             throw error;
         }
         syncAuthUser(data.session?.user || null);
-        if (!data.session && callbackUrl.searchParams.has('code')) {
-            cleanOAuthCallbackUrl();
-            showToast('O retorno do login está usando um código PKCE antigo. Inicie o login novamente.', 'danger');
-        }
     } catch (error) {
         console.error('Não foi possível concluir a autenticação do Supabase:', error);
         authInitialized = true;
