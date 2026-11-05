@@ -777,15 +777,15 @@ body.dark-mode .cover-upload-zone[style*="rgb(16, 185, 129)"] { background: #173
                             </div>
                             <div class="import-hint">
                                 <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                                Suporta HuggingFace, Google Drive, Pixeldrain e links diretos
+                                Links HTTPS externos continuam hospedados na origem. Para guardar o arquivo no Storage, use a opção Ficheiro Local.
                             </div>
                         </div>
                         <div class="import-tab-content" id="import-tab-file">
                             <div class="file-drop-zone" id="model-file-drop">
-                                <input type="file" id="model-file-input" hidden accept=".zip,.pth,.index">
+                                <input type="file" id="model-file-input" hidden accept=".zip,.pth,.index" multiple>
                                 <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
-                                <p>Arraste e solte o arquivo .zip ou .pth aqui</p>
-                                <span>ou clique para navegar pelo seu computador</span>
+                                <p>Arraste e solte arquivos .zip, .pth ou .index aqui</p>
+                                <span>Selecione um ou mais arquivos · até 50 MB por arquivo · enviados ao Storage público</span>
                                 <div class="file-drop-formats">
                                     <span class="file-format-badge">.ZIP</span>
                                     <span class="file-format-badge">.PTH</span>
@@ -796,9 +796,9 @@ body.dark-mode .cover-upload-zone[style*="rgb(16, 185, 129)"] { background: #173
                     </div>
                     <div class="import-footer">
                         <button class="import-cancel" onclick="switchTab('voice-models')">Cancelar</button>
-                        <button class="btn-publish-model" onclick="publishModel()">
+                        <button class="btn-publish-model" id="btn-publish-model" onclick="publishModel()">
                             <svg viewBox="0 0 24 24"><path d="M12 3v12"/><polyline points="7 8 12 3 17 8"/><path d="M5 21h14a2 2 0 0 0 2-2v-4"/></svg>
-                            Publicar Modelo
+                            <span>Publicar Modelo</span>
                         </button>
                     </div>
                 </div>
@@ -855,9 +855,14 @@ body.dark-mode .cover-upload-zone[style*="rgb(16, 185, 129)"] { background: #173
                 </select>
             </div>
             <div class="modal-field">
-                <label for="modal-model-url">Link do Hugging Face <span>*</span></label>
-                <input id="modal-model-url" name="url" type="url" placeholder="https://huggingface.co/.../resolve/main/model.pth" required>
-                <small>Informe um link público que termine em .pth ou .index. Este protótipo salva os dados localmente.</small>
+                <label for="modal-model-url">Link HTTPS do modelo</label>
+                <input id="modal-model-url" name="url" type="url" placeholder="https://huggingface.co/.../resolve/main/model.pth">
+                <small>O link permanece hospedado na origem. Selecione arquivos abaixo para enviá-los ao Storage público do Supabase.</small>
+            </div>
+            <div class="modal-field">
+                <label for="modal-model-files">Arquivos RVC</label>
+                <input id="modal-model-files" name="files" type="file" accept=".zip,.pth,.index" multiple>
+                <small>Selecione .zip, .pth ou .index · até 50 MB por arquivo.</small>
             </div>
             <div class="modal-field">
                 <label for="modal-cover-file">Imagem de capa</label>
@@ -866,7 +871,7 @@ body.dark-mode .cover-upload-zone[style*="rgb(16, 185, 129)"] { background: #173
                     <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5 11 16.51 14.5 12l4.5 6H5l3.5-4.5z"/></svg>
                     <div class="import-cover-drop-copy">
                         <strong id="modal-cover-title">Arraste uma imagem ou clique para escolher</strong>
-                        <span id="modal-cover-hint">PNG, JPG ou WEBP · até 5 MB</span>
+                        <span id="modal-cover-hint">PNG, JPG ou WEBP · até 3 MB</span>
                     </div>
                 </div>
             </div>
@@ -1088,6 +1093,8 @@ body.dark-mode .cover-upload-zone[style*="rgb(16, 185, 129)"] { background: #173
 <script>
 const SUPABASE_URL = 'https://vvlrmoedtuyxakidizhl.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_pPXz6iHNxysSueCQZzpP5A_aw8Ych0E';
+const RVC_STORAGE_BUCKET = 'rvc-models';
+const MAX_RVC_FILE_SIZE = 50 * 1024 * 1024;
 const APP_ENTRY_FILE = 'deepseek_html_20261014_92896b (13).html';
 const supabaseClient = window.supabase.createClient(
     SUPABASE_URL,
@@ -1215,7 +1222,10 @@ function renderModelCards(grid, modelList) {
             </div>`;
         const modelImage = card.querySelector('.card-avatar');
         modelImage.addEventListener('error', () => { modelImage.src = fallbackImg; }, { once: true });
-        card.querySelector('.delete-btn').addEventListener('click', () => confirmDelete(model.id));
+        const deleteButton = card.querySelector('.delete-btn');
+        const canDelete = Boolean(currentUser && model.ownerId === currentUser.id);
+        deleteButton.hidden = !canDelete;
+        if (canDelete) deleteButton.addEventListener('click', () => confirmDelete(model.id));
         if (model.audioUrl) {
             card.querySelector('.play-button').addEventListener('click', event => togglePlay(model.id, event.currentTarget));
         }
@@ -1237,7 +1247,13 @@ function getFavoritesErrorMessage(error) {
     if (error?.code === '42501') {
         return 'O Supabase bloqueou o acesso aos favoritos. Confira as políticas RLS da tabela favorites.';
     }
-    return 'Não foi possível acessar a tabela favorites. Confira a tabela e as políticas de acesso no Supabase.';
+    if (error?.code === '23503' || error?.code === '22P02') {
+        return 'Este modelo ainda não está publicado na tabela voice_models do Supabase. Modelos salvos apenas neste navegador não podem ser favoritados na nuvem.';
+    }
+    const details = [error?.code, error?.message].filter(Boolean).join(': ');
+    return details
+        ? `Não foi possível salvar o favorito (${details}). Confira o erro no Console do navegador.`
+        : 'Não foi possível salvar o favorito. Confira o erro no Console do navegador.';
 }
 
 function renderFavorites() {
@@ -1304,7 +1320,9 @@ function normalizeVoiceModel(row) {
         uses: Number(row.downloads) || 0,
         likes: Number(row.likes) || 0,
         createdAt: row.created_at || null,
-        tags: Array.isArray(row.tags) ? row.tags : []
+        tags: Array.isArray(row.tags) ? row.tags : [],
+        ownerId: row.owner_id || null,
+        modelFiles: Array.isArray(row.model_files) ? row.model_files : []
     };
 }
 
@@ -1378,6 +1396,10 @@ async function toggleFavorite(id) {
     if (!currentUser) {
         showToast('Entre na sua conta para salvar modelos favoritos.', 'danger');
         openLoginModal();
+        return;
+    }
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(modelId)) {
+        showToast(getFavoritesErrorMessage({ code: '22P02' }), 'danger');
         return;
     }
     if (favoritesLoading) {
@@ -1480,12 +1502,43 @@ async function togglePlay(id, btn) {
 }
 
 function confirmDelete(id) {
-    if (confirm('Tem certeza que deseja excluir este modelo?')) {
-        models = models.filter(m => m.id !== id);
-        localStorage.setItem('weightsModels', JSON.stringify(models));
-        localStorage.removeItem(`liked_${id}`);
+    const model = models.find(item => item.id === id);
+    if (!currentUser || model?.ownerId !== currentUser.id) {
+        showToast('Somente o criador pode excluir um modelo publicado na nuvem.', 'danger');
+        return;
+    }
+    if (!confirm('Tem certeza que deseja excluir este modelo?')) return;
+    deleteCloudVoiceModel(model);
+}
+
+async function deleteCloudVoiceModel(model) {
+    try {
+        const { error } = await supabaseClient
+            .from('voice_models')
+            .delete()
+            .eq('id', model.id)
+            .eq('owner_id', currentUser.id);
+        if (error) throw error;
+
+        models = models.filter(item => item.id !== model.id);
+        favoriteModelIds.delete(String(model.id));
         renderModels();
-        showToast('Modelo excluído', 'danger');
+
+        const assetPaths = model.modelFiles.map(asset => asset.path).filter(Boolean);
+        if (assetPaths.length) {
+            const { error: storageError } = await supabaseClient.storage
+                .from(RVC_STORAGE_BUCKET)
+                .remove(assetPaths);
+            if (storageError) {
+                console.error('O modelo foi removido, mas não foi possível apagar todos os arquivos do Storage:', storageError);
+                showToast('Modelo removido, mas alguns arquivos ficaram no Storage.', 'danger');
+                return;
+            }
+        }
+        showToast('Modelo e arquivos removidos da nuvem.', 'success');
+    } catch (error) {
+        console.error('Não foi possível excluir o modelo da nuvem:', error);
+        showToast(getCloudPublishErrorMessage(error), 'danger');
     }
 }
 
@@ -1518,7 +1571,9 @@ const importModal = document.getElementById('import-modal');
 const importModalForm = document.getElementById('import-modal-form');
 const modalCoverFile = document.getElementById('modal-cover-file');
 const modalCoverDrop = document.getElementById('modal-cover-drop');
+const modalModelFiles = document.getElementById('modal-model-files');
 let modalCoverData = null;
+let publishingModel = false;
 
 function openImportModal() {
     importModal.classList.add('active');
@@ -1568,56 +1623,192 @@ modalCoverFile.addEventListener('change', () => previewImportCover(modalCoverFil
 importModal.addEventListener('click', event => {
     if (event.target === importModal) closeImportModal();
 });
-importModalForm.addEventListener('submit', event => {
+
+function getCloudPublishErrorMessage(error) {
+    const message = String(error?.message || '');
+    if (error?.code === '42501' || /row-level security|permission denied/i.test(message)) {
+        return 'O Supabase bloqueou a publicação. Execute rvc_storage.sql e entre na sua conta.';
+    }
+    if (/bucket not found/i.test(message)) {
+        return 'O bucket rvc-models não existe. Execute rvc_storage.sql no Supabase.';
+    }
+    const details = [error?.code, message].filter(Boolean).join(': ');
+    return details
+        ? `Não foi possível publicar na nuvem (${details}).`
+        : 'Não foi possível publicar na nuvem. Confira o Console do navegador.';
+}
+
+function sanitizeStorageFilename(filename) {
+    return String(filename || 'arquivo')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9._-]+/g, '_')
+        .replace(/^\.+/, '')
+        .slice(-120) || 'arquivo';
+}
+
+async function uploadModelAsset(file, userId, modelId, kind) {
+    if (file.size > MAX_RVC_FILE_SIZE) {
+        throw new Error(`${file.name} excede o limite de 50 MB por arquivo.`);
+    }
+    const path = `${userId}/${modelId}/${kind}/${crypto.randomUUID()}-${sanitizeStorageFilename(file.name)}`;
+    const contentType = file.type || 'application/octet-stream';
+    const { error } = await supabaseClient.storage
+        .from(RVC_STORAGE_BUCKET)
+        .upload(path, file, { cacheControl: '3600', upsert: false, contentType });
+    if (error) throw error;
+
+    return {
+        kind,
+        name: file.name,
+        path,
+        url: supabaseClient.storage.from(RVC_STORAGE_BUCKET).getPublicUrl(path).data.publicUrl,
+        size: file.size,
+        contentType
+    };
+}
+
+async function createCloudVoiceModel({ name, creator, category, gender = 'outros', tags = [], files = [], sourceUrl = '', coverData = '' }) {
+    if (!currentUser) throw new Error('Entre na sua conta para publicar modelos na nuvem.');
+    if (!files.length && !sourceUrl) throw new Error('Selecione um arquivo RVC ou informe um link HTTPS.');
+    if (files.some(file => !/\.(zip|pth|index)$/i.test(file.name))) {
+        throw new Error('Use arquivos .zip, .pth ou .index.');
+    }
+    if (sourceUrl) {
+        let parsedUrl;
+        try {
+            parsedUrl = new URL(sourceUrl);
+        } catch {
+            throw new Error('Informe um link válido para o modelo.');
+        }
+        if (parsedUrl.protocol !== 'https:') throw new Error('O link do modelo deve usar HTTPS.');
+    }
+
+    const userId = currentUser.id;
+    const modelId = crypto.randomUUID();
+    const uploadedAssets = [];
+    try {
+        for (const file of files) {
+            uploadedAssets.push(await uploadModelAsset(file, userId, modelId, 'model'));
+        }
+        if (sourceUrl) {
+            const url = new URL(sourceUrl);
+            uploadedAssets.push({
+                kind: 'external',
+                name: decodeURIComponent(url.pathname.split('/').pop() || 'modelo RVC'),
+                url: url.toString()
+            });
+        }
+        let imageUrl = null;
+        if (coverData) {
+            const response = await fetch(coverData);
+            if (!response.ok) throw new Error('Não foi possível preparar a imagem de capa.');
+            const blob = await response.blob();
+            const extension = blob.type === 'image/png' ? 'png' : blob.type === 'image/webp' ? 'webp' : 'jpg';
+            const coverFile = new File([blob], `capa.${extension}`, { type: blob.type || 'image/jpeg' });
+            const coverAsset = await uploadModelAsset(coverFile, userId, modelId, 'cover');
+            uploadedAssets.push(coverAsset);
+            imageUrl = coverAsset.url;
+        }
+
+        const { data, error } = await supabaseClient
+            .from('voice_models')
+            .insert({
+                id: modelId,
+                owner_id: userId,
+                title: name,
+                creator,
+                category: category || 'others',
+                gender,
+                image_url: imageUrl,
+                downloads: 0,
+                likes: 0,
+                model_files: uploadedAssets,
+                tags
+            })
+            .select('*')
+            .single();
+        if (error) throw error;
+        return normalizeVoiceModel(data);
+    } catch (error) {
+        const uploadedPaths = uploadedAssets.map(asset => asset.path).filter(Boolean);
+        if (uploadedPaths.length) {
+            const { error: cleanupError } = await supabaseClient.storage
+                .from(RVC_STORAGE_BUCKET)
+                .remove(uploadedPaths);
+            if (cleanupError) {
+                console.error('Não foi possível remover os arquivos após a falha na publicação:', cleanupError);
+            }
+        }
+        throw error;
+    }
+}
+
+importModalForm.addEventListener('submit', async event => {
     event.preventDefault();
     const name = document.getElementById('modal-model-name').value.trim();
     const categorySelect = document.getElementById('modal-model-category');
     const category = categorySelect.value;
     const modelUrl = document.getElementById('modal-model-url').value.trim();
+    const files = Array.from(modalModelFiles.files);
     if (!name) {
         showToast('Informe o nome da voz.', 'danger');
         return;
     }
-    let parsedUrl;
-    try {
-        parsedUrl = new URL(modelUrl);
-    } catch (error) {
-        showToast('Informe um link válido do Hugging Face.', 'danger');
+    if (!files.length && !modelUrl) {
+        showToast('Selecione arquivos RVC ou informe um link HTTPS.', 'danger');
         return;
     }
-    const modelExtension = parsedUrl.pathname.toLowerCase();
-    if (parsedUrl.protocol !== 'https:' || !['huggingface.co', 'www.huggingface.co'].includes(parsedUrl.hostname) || !/\.(pth|index)$/.test(modelExtension)) {
-        showToast('O link deve ser do Hugging Face e apontar para um arquivo .pth ou .index.', 'danger');
+    if (modelUrl) {
+        let parsedUrl;
+        try {
+            parsedUrl = new URL(modelUrl);
+        } catch {
+            showToast('Informe um link HTTPS válido para o modelo.', 'danger');
+            return;
+        }
+        if (parsedUrl.protocol !== 'https:') {
+            showToast('O link do modelo deve usar HTTPS.', 'danger');
+            return;
+        }
+    }
+    if (!currentUser) {
+        showToast('Entre na sua conta para publicar modelos na nuvem.', 'danger');
+        openLoginModal();
         return;
     }
+
+    const submitButton = importModalForm.querySelector('button[type="submit"]');
+    if (publishingModel) return;
+    publishingModel = true;
+    submitButton.disabled = true;
+    submitButton.textContent = 'Enviando...';
     const categoryNames = { anime: 'Anime', games: 'Jogos', cartoon: 'Desenho', musicians: 'Músicos', movies: 'Filmes', others: 'Outros' };
-    const newModel = {
-        id: `model_${Date.now()}`,
-        name,
-        creator: currentUser?.name || 'Você',
-        image: modalCoverData || generateFallbackImage(name),
-        tags: ['RVC V2', 'PT-BR', categoryNames[category] || 'Outros'],
-        likes: 0,
-        uses: 0,
-        category,
-        gender: 'outros',
-        modelUrl
-    };
-    models.unshift(newModel);
     try {
-        localStorage.setItem('weightsModels', JSON.stringify(models));
+        const model = await createCloudVoiceModel({
+            name,
+            creator: currentUser.name,
+            category,
+            tags: ['RVC V2', 'PT-BR', categoryNames[category] || 'Outros'],
+            sourceUrl: modelUrl,
+            files,
+            coverData: modalCoverData
+        });
+        models.unshift(model);
+        importModalForm.reset();
+        modalCoverData = null;
+        modalCoverDrop.innerHTML = '<svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5 11 16.51 14.5 12l4.5 6H5l3.5-4.5z"/></svg><div class="import-cover-drop-copy"><strong id="modal-cover-title">Arraste uma imagem ou clique para escolher</strong><span id="modal-cover-hint">PNG, JPG ou WEBP · até 3 MB</span></div>';
+        closeImportModal();
+        renderModels();
+        showToast('Modelo publicado na nuvem com sucesso!', 'success');
     } catch (error) {
-        models.shift();
-        console.error('Não foi possível salvar o modelo:', error);
-        showToast('Não foi possível salvar. Remova imagens antigas ou tente uma capa menor.', 'danger');
-        return;
+        console.error('Não foi possível publicar o modelo na nuvem:', error);
+        showToast(getCloudPublishErrorMessage(error), 'danger');
+    } finally {
+        publishingModel = false;
+        submitButton.disabled = false;
+        submitButton.textContent = 'Publicar Modelo';
     }
-    importModalForm.reset();
-    modalCoverData = null;
-    modalCoverDrop.innerHTML = '<svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5 11 16.51 14.5 12l4.5 6H5l3.5-4.5z"/></svg><div class="import-cover-drop-copy"><strong id="modal-cover-title">Arraste uma imagem ou clique para escolher</strong><span id="modal-cover-hint">PNG, JPG ou WEBP · até 3 MB</span></div>';
-    closeImportModal();
-    renderModels();
-    showToast('Modelo publicado com sucesso!', 'success');
 });
 
 document.querySelectorAll('.import-tab').forEach(tab => {
@@ -1638,6 +1829,11 @@ coverPreview?.addEventListener('click', () => coverInput.click());
 coverInput?.addEventListener('change', e => {
     const file = e.target.files[0];
     if (!file) return;
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type) || file.size > 3 * 1024 * 1024) {
+        coverInput.value = '';
+        showToast('Escolha uma imagem PNG, JPG ou WEBP de até 3 MB.', 'danger');
+        return;
+    }
     const reader = new FileReader();
     reader.onload = event => {
         uploadedCoverData = event.target.result;
@@ -1646,11 +1842,36 @@ coverInput?.addEventListener('change', e => {
         coverPreview.style.borderColor = 'var(--accent-purple)';
         showToast('Capa carregada!', 'success');
     };
+    reader.onerror = () => showToast('Não foi possível ler a imagem selecionada.', 'danger');
     reader.readAsDataURL(file);
 });
 
 const modelFileDrop = document.getElementById('model-file-drop');
 const modelFileInput = document.getElementById('model-file-input');
+let selectedModelFiles = [];
+function setSelectedModelFiles(fileList) {
+    const files = Array.from(fileList || []);
+    const invalidFile = files.find(file => !/\.(zip|pth|index)$/i.test(file.name));
+    const oversizedFile = files.find(file => file.size > MAX_RVC_FILE_SIZE);
+    if (invalidFile || oversizedFile) {
+        selectedModelFiles = [];
+        modelFileInput.value = '';
+        modelFileDrop.querySelector('p').textContent = 'Arraste ou selecione arquivos .zip, .pth ou .index';
+        modelFileDrop.style.borderColor = '';
+        modelFileDrop.style.background = '';
+        showToast(
+            oversizedFile ? `${oversizedFile.name} excede o limite de 50 MB.` : 'Use arquivos RVC .zip, .pth ou .index.',
+            'danger'
+        );
+        return;
+    }
+    selectedModelFiles = files;
+    modelFileDrop.querySelector('p').textContent = files.length
+        ? '✓ ' + files.map(file => file.name).join(', ')
+        : 'Arraste ou selecione arquivos .zip, .pth ou .index';
+    modelFileDrop.style.borderColor = files.length ? 'var(--success)' : '';
+    modelFileDrop.style.background = files.length ? '#F0FDF4' : '';
+}
 modelFileDrop?.addEventListener('click', () => modelFileInput.click());
 modelFileDrop?.addEventListener('dragover', e => {
     e.preventDefault();
@@ -1660,21 +1881,11 @@ modelFileDrop?.addEventListener('dragleave', () => modelFileDrop.classList.remov
 modelFileDrop?.addEventListener('drop', e => {
     e.preventDefault();
     modelFileDrop.classList.remove('dragover');
-    if (e.dataTransfer.files.length) {
-        modelFileDrop.querySelector('p').textContent = '✓ ' + e.dataTransfer.files[0].name;
-        modelFileDrop.style.borderColor = 'var(--success)';
-        modelFileDrop.style.background = '#F0FDF4';
-    }
+    setSelectedModelFiles(e.dataTransfer.files);
 });
-modelFileInput?.addEventListener('change', () => {
-    if (modelFileInput.files.length) {
-        modelFileDrop.querySelector('p').textContent = '✓ ' + modelFileInput.files[0].name;
-        modelFileDrop.style.borderColor = 'var(--success)';
-        modelFileDrop.style.background = '#F0FDF4';
-    }
-});
+modelFileInput?.addEventListener('change', () => setSelectedModelFiles(modelFileInput.files));
 
-function publishModel() {
+async function publishModel() {
     const name = document.getElementById('import-name').value.trim();
     const creator = document.getElementById('import-creator').value.trim();
     const category = document.getElementById('import-category').value;
@@ -1684,43 +1895,76 @@ function publishModel() {
         showToast('Preencha Nome e Criador.', 'danger');
         return;
     }
+    if (!currentUser) {
+        showToast('Entre na sua conta para publicar modelos na nuvem.', 'danger');
+        openLoginModal();
+        return;
+    }
 
     const tags = [];
     if (category) tags.push(category);
     if (language) tags.push(language.toUpperCase());
     if (!tags.length) tags.push('RVC V2');
 
-    const newModel = {
-        id: 'model_' + Date.now(),
-        name: name,
-        creator: creator,
-        image: uploadedCoverData || generateFallbackImage(name),
-        tags: tags,
-        likes: 0,
-        uses: 0,
-        category: category || 'others',
-        gender: 'outros'
-    };
+    const activeImportTab = document.querySelector('.import-tab.active')?.dataset.importTab || 'link';
+    const sourceUrl = activeImportTab === 'link' ? document.getElementById('import-url').value.trim() : '';
+    const files = activeImportTab === 'file' ? selectedModelFiles : [];
+    if (!files.length && !sourceUrl) {
+        showToast('Selecione arquivos RVC ou informe um link HTTPS.', 'danger');
+        return;
+    }
+    if (sourceUrl) {
+        try {
+            if (new URL(sourceUrl).protocol !== 'https:') throw new Error();
+        } catch {
+            showToast('Informe um link HTTPS válido para o modelo.', 'danger');
+            return;
+        }
+    }
+    if (publishingModel) return;
 
-    models.unshift(newModel);
-    localStorage.setItem('weightsModels', JSON.stringify(models));
-
-    document.getElementById('import-name').value = '';
-    document.getElementById('import-creator').value = '';
-    document.getElementById('import-category').value = '';
-    document.getElementById('import-language').value = '';
-    document.getElementById('import-url').value = '';
-    uploadedCoverData = null;
-    coverPreview.innerHTML = '<svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>';
-    coverPreview.style.borderStyle = 'dashed';
-    coverPreview.style.borderColor = '#D1D5DB';
-    modelFileDrop.querySelector('p').textContent = 'Arraste e solte o arquivo .zip ou .pth aqui';
-    modelFileDrop.style.borderColor = '#D1D5DB';
-    modelFileDrop.style.background = 'var(--bg-main)';
-
-    renderModels();
-    switchTab('voice-models');
-    showToast('Modelo publicado com sucesso!', 'success');
+    const publishButton = document.getElementById('btn-publish-model');
+    publishingModel = true;
+    publishButton.disabled = true;
+    publishButton.dataset.originalText = publishButton.textContent.trim();
+    publishButton.querySelector('span')?.replaceChildren(document.createTextNode('Enviando...'));
+    try {
+        const model = await createCloudVoiceModel({
+            name,
+            creator,
+            category: category || 'others',
+            tags,
+            files,
+            sourceUrl,
+            coverData: uploadedCoverData
+        });
+        models.unshift(model);
+        document.getElementById('import-name').value = '';
+        document.getElementById('import-creator').value = '';
+        document.getElementById('import-category').value = '';
+        document.getElementById('import-language').value = '';
+        document.getElementById('import-url').value = '';
+        uploadedCoverData = null;
+        coverInput.value = '';
+        coverPreview.innerHTML = '<svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>';
+        coverPreview.style.borderStyle = 'dashed';
+        coverPreview.style.borderColor = '#D1D5DB';
+        selectedModelFiles = [];
+        modelFileInput.value = '';
+        modelFileDrop.querySelector('p').textContent = 'Arraste ou selecione arquivos .zip, .pth ou .index';
+        modelFileDrop.style.borderColor = '';
+        modelFileDrop.style.background = '';
+        renderModels();
+        switchTab('voice-models');
+        showToast('Modelo publicado na nuvem com sucesso!', 'success');
+    } catch (error) {
+        console.error('Não foi possível publicar o modelo na nuvem:', error);
+        showToast(getCloudPublishErrorMessage(error), 'danger');
+    } finally {
+        publishingModel = false;
+        publishButton.disabled = false;
+        publishButton.querySelector('span')?.replaceChildren(document.createTextNode('Publicar Modelo'));
+    }
 }
 
 /* =========================================================
