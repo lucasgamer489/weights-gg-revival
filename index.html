@@ -136,6 +136,28 @@ body { background-color: var(--bg-main); color: var(--text-main); height: 100vh;
 .page-header { margin-bottom: 28px; }
 .page-header h1 { font-size: 28px; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.5px; color: var(--text-main); }
 .page-header p { color: var(--text-muted); font-size: 15px; }
+.creation-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 22px; }
+.creation-tab { min-height: 38px; padding: 0 17px; border: 1px solid var(--border-color); border-radius: 999px; background: var(--bg-card); color: var(--text-sidebar); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s ease; }
+.creation-tab:hover { border-color: var(--text-subtle); color: var(--text-main); }
+.creation-tab.active { border-color: var(--accent); background: var(--accent); color: var(--accent-text); }
+.creation-list { display: grid; gap: 10px; }
+.creation-item { display: grid; grid-template-columns: 58px minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 12px; border: 1px solid var(--border-color); border-radius: 14px; background: var(--bg-card); box-shadow: var(--shadow-sm); }
+.creation-thumb { width: 58px; height: 58px; overflow: hidden; display: grid; place-items: center; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-input); color: var(--accent-purple); }
+.creation-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.creation-thumb svg { width: 24px; height: 24px; fill: currentColor; }
+.creation-info { min-width: 0; }
+.creation-title { overflow: hidden; color: var(--text-main); font-size: 14px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.creation-meta { margin-top: 5px; color: var(--text-muted); font-size: 12px; line-height: 1.45; }
+.creation-note { margin-top: 5px; color: var(--text-subtle); font-size: 11px; line-height: 1.45; }
+.creation-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+.creation-status { padding: 6px 9px; border-radius: 7px; background: var(--accent-purple-light); color: var(--accent-purple); font-size: 11px; font-weight: 700; white-space: nowrap; }
+.creation-audio { width: min(220px, 24vw); height: 34px; }
+.creation-download, .creation-delete { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--border-color); border-radius: 9px; background: var(--bg-card); color: var(--text-muted); cursor: pointer; }
+.creation-download:hover, .creation-delete:hover { border-color: var(--accent-purple); color: var(--accent-purple); }
+.creation-download svg, .creation-delete svg { width: 16px; height: 16px; fill: currentColor; }
+.creation-empty { padding: 58px 22px; border: 1px dashed var(--border-color); border-radius: 16px; color: var(--text-muted); text-align: center; line-height: 1.6; }
+.creation-empty strong { display: block; margin-bottom: 6px; color: var(--text-main); font-size: 16px; }
+.creation-empty .use-btn { margin: 16px auto 0; }
 .filters { display: flex; gap: 8px; margin-bottom: 32px; flex-wrap: wrap; }
 .filter-btn { padding: 8px 18px; border-radius: 9999px; border: 1px solid transparent; background: var(--bg-tag); font-size: 13px; font-weight: 600; color: var(--text-sidebar); cursor: pointer; transition: all 0.15s ease; font-family: inherit; }
 .filter-btn:hover { background: var(--bg-tag-hover); color: var(--text-main); }
@@ -576,6 +598,14 @@ body.dark-mode .cover-upload-zone[style*="rgb(16, 185, 129)"] { background: #173
     .header-right .btn-primary { padding: 10px 13px; }
     .header-right .btn-primary span { display: none; }
     .grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+    .content-area { padding: 22px 16px 32px; }
+    .creation-item { grid-template-columns: 46px minmax(0, 1fr); gap: 10px; padding: 10px; }
+    .creation-thumb { width: 46px; height: 46px; }
+    .creation-info { grid-column: 2; }
+    .creation-title { font-size: 13px; white-space: normal; }
+    .creation-meta { font-size: 11px; }
+    .creation-actions { grid-column: 1 / -1; justify-content: flex-end; flex-wrap: wrap; }
+    .creation-audio { width: min(100%, 240px); }
     .chat-view-active .sidebar { width: 64px; min-width: 64px; padding: 16px 7px; }
     .chat-view-active .logo { justify-content: center; padding-left: 0; font-size: 0; }
     .chat-view-active .logo::before { content: 'W'; color: var(--text-main); font-size: 20px; font-weight: 900; }
@@ -625,6 +655,10 @@ body.dark-mode .cover-upload-zone[style*="rgb(16, 185, 129)"] { background: #173
         <button class="nav-item" data-target="favoritos">
             <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
             <span>Favoritos</span>
+        </button>
+        <button class="nav-item" data-target="minhas-criacoes">
+            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM8 16h8v-2H8v2zm0-4h5v-2H8v2zm0-4h8V6H8v2z"/></svg>
+            <span>Minhas Criações</span>
         </button>
         <button class="nav-item" data-target="colecoes">
             <svg viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg>
@@ -877,6 +911,20 @@ body.dark-mode .cover-upload-zone[style*="rgb(16, 185, 129)"] { background: #173
             <div class="grid" id="favorites-grid"></div>
         </div>
 
+        <section id="minhas-criacoes" class="tab-pane" aria-labelledby="my-creations-title">
+            <div class="page-header">
+                <h1 id="my-creations-title">Minhas Criações</h1>
+                <p>Acompanhe seus covers e outras criações em um só lugar.</p>
+            </div>
+            <div class="creation-tabs" role="tablist" aria-label="Tipo de criação">
+                <button class="creation-tab active" type="button" role="tab" aria-selected="true" data-creation-type="covers">Covers</button>
+                <button class="creation-tab" type="button" role="tab" aria-selected="false" data-creation-type="images">Imagens</button>
+                <button class="creation-tab" type="button" role="tab" aria-selected="false" data-creation-type="videos">Vídeos</button>
+                <button class="creation-tab" type="button" role="tab" aria-selected="false" data-creation-type="songs">Canções</button>
+            </div>
+            <div class="creation-list" id="creation-list" role="tabpanel" aria-live="polite"></div>
+        </section>
+
         <div id="view-cover-de-voz" class="tab-pane">
             <div class="page-header">
                 <h1>Cover de Voz</h1>
@@ -1041,11 +1089,10 @@ body.dark-mode .cover-upload-zone[style*="rgb(16, 185, 129)"] { background: #173
         </div>
 
         <div class="cover-modal-body">
-            <!-- Generating overlay -->
-            <div class="generating-overlay" id="generating-overlay">
-                <div class="generating-spinner"></div>
-                <h3>A gerar seu cover...</h3>
-                <p>Aplicando a voz selecionada ao áudio</p>
+                    <div class="generating-overlay" id="generating-overlay">
+                        <div class="generating-spinner"></div>
+                        <h3>Preparando sua solicitação...</h3>
+                        <p>Registrando o cover em Minhas Criações</p>
             </div>
 
             <!-- ABAS SEMPRE VISÍVEIS -->
@@ -1682,6 +1729,209 @@ async function deleteCloudVoiceModel(model) {
     }
 }
 
+const creationTypes = ['covers', 'images', 'videos', 'songs'];
+let activeCreationType = 'covers';
+
+function getCreationsStorageKey() {
+    return `weightsCreations:${currentUser?.id || 'guest'}`;
+}
+
+function readCreations() {
+    try {
+        const saved = localStorage.getItem(getCreationsStorageKey());
+        if (!saved) return [];
+        const parsed = JSON.parse(saved);
+        if (!Array.isArray(parsed)) throw new Error('O histórico salvo não é uma lista válida.');
+        return parsed.filter(item =>
+            item
+            && typeof item.id === 'string'
+            && creationTypes.includes(item.type)
+            && typeof item.title === 'string'
+            && typeof item.createdAt === 'string'
+        );
+    } catch (error) {
+        console.error('Não foi possível ler Minhas Criações:', error);
+        return null;
+    }
+}
+
+function renderMyCreations() {
+    const list = document.getElementById('creation-list');
+    if (!list) return;
+    const creations = readCreations();
+    list.replaceChildren();
+
+    if (!creations) {
+        const errorState = document.createElement('div');
+        errorState.className = 'creation-empty';
+        errorState.textContent = 'Não foi possível carregar suas criações salvas neste navegador.';
+        list.append(errorState);
+        return;
+    }
+
+    const items = creations
+        .filter(item => item.type === activeCreationType)
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    if (!items.length) {
+        const emptyState = document.createElement('div');
+        emptyState.className = 'creation-empty';
+        const heading = document.createElement('strong');
+        heading.textContent = activeCreationType === 'covers'
+            ? 'Seus covers aparecerão aqui'
+            : 'Ainda não há criações nesta categoria';
+        const description = document.createElement('span');
+        description.textContent = activeCreationType === 'covers'
+            ? 'Comece um cover de voz e acompanhe as solicitações nesta página.'
+            : 'A geração desta categoria ainda não está conectada à interface.';
+        emptyState.append(heading, description);
+        if (activeCreationType === 'covers') {
+            const createButton = document.createElement('button');
+            createButton.className = 'use-btn';
+            createButton.type = 'button';
+            createButton.textContent = 'Criar um cover';
+            createButton.addEventListener('click', () => switchTab('view-cover-de-voz'));
+            emptyState.append(createButton);
+        }
+        list.append(emptyState);
+        return;
+    }
+
+    items.forEach(item => {
+        const row = document.createElement('article');
+        row.className = 'creation-item';
+
+        const thumb = document.createElement('div');
+        thumb.className = 'creation-thumb';
+        if (typeof item.imageUrl === 'string' && /^https:\/\//i.test(item.imageUrl)) {
+            const image = document.createElement('img');
+            image.src = item.imageUrl;
+            image.alt = '';
+            thumb.append(image);
+        } else {
+            thumb.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v10.55a4 4 0 1 0 2 3.45V7h5V3h-7z"/></svg>';
+        }
+
+        const info = document.createElement('div');
+        info.className = 'creation-info';
+        const title = document.createElement('h2');
+        title.className = 'creation-title';
+        title.textContent = item.title;
+        const meta = document.createElement('p');
+        meta.className = 'creation-meta';
+        const createdAt = new Date(item.createdAt);
+        const formattedDate = Number.isNaN(createdAt.getTime())
+            ? 'Data indisponível'
+            : createdAt.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+        meta.textContent = [item.modelName, item.sourceName, formattedDate].filter(Boolean).join(' · ');
+        info.append(title, meta);
+
+        const actions = document.createElement('div');
+        actions.className = 'creation-actions';
+        const audioUrl = typeof item.outputUrl === 'string' && /^https:\/\//i.test(item.outputUrl)
+            ? item.outputUrl
+            : '';
+        if (audioUrl) {
+            const audio = document.createElement('audio');
+            audio.className = 'creation-audio';
+            audio.controls = true;
+            audio.preload = 'none';
+            audio.src = audioUrl;
+            actions.append(audio);
+            const download = document.createElement('a');
+            download.className = 'creation-download';
+            download.href = audioUrl;
+            download.download = '';
+            download.title = 'Baixar áudio';
+            download.setAttribute('aria-label', 'Baixar áudio');
+            download.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg>';
+            actions.append(download);
+        } else {
+            const status = document.createElement('span');
+            status.className = 'creation-status';
+            status.textContent = 'Sem áudio gerado';
+            actions.append(status);
+            const note = document.createElement('p');
+            note.className = 'creation-note';
+            note.textContent = item.note || 'A solicitação foi registrada, mas o motor de geração ainda não fornece um arquivo de áudio.';
+            info.append(note);
+        }
+
+        const removeButton = document.createElement('button');
+        removeButton.className = 'creation-delete';
+        removeButton.type = 'button';
+        removeButton.title = 'Remover do histórico';
+        removeButton.setAttribute('aria-label', `Remover ${item.title} do histórico`);
+        removeButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5L8 4H5v2h14V4z"/></svg>';
+        removeButton.addEventListener('click', () => {
+            if (!confirm('Remover esta criação do histórico deste navegador?')) return;
+            saveCreations(creations.filter(creation => creation.id !== item.id));
+            renderMyCreations();
+        });
+        actions.append(removeButton);
+        row.append(thumb, info, actions);
+        list.append(row);
+    });
+}
+
+function saveCreations(creations) {
+    try {
+        localStorage.setItem(getCreationsStorageKey(), JSON.stringify(creations.slice(-100)));
+        return true;
+    } catch (error) {
+        console.error('Não foi possível salvar Minhas Criações:', error);
+        showToast('Não foi possível salvar o histórico neste navegador.', 'danger');
+        return false;
+    }
+}
+
+function saveCoverCreation() {
+    const creations = readCreations();
+    if (!creations) {
+        showToast('Não foi possível carregar o histórico para salvar este cover.', 'danger');
+        return false;
+    }
+    const model = models.find(item => String(item.id) === selectedCoverModelId);
+    const activeAudioTab = document.querySelector('.cover-audio-tab.active')?.dataset.coverTab;
+    const sourceFile = coverFileInput?.files?.[0];
+    const selectedRecentAudio = document.querySelector('.recent-audio-item.selected .recent-audio-name')?.textContent?.trim();
+    const sourceName = activeAudioTab === 'tts'
+        ? 'Texto para voz'
+        : activeAudioTab === 'record'
+            ? `Gravação (${document.getElementById('cover-record-timer')?.textContent || 'áudio'})`
+            : currentYoutubeData?.title
+                || sourceFile?.name
+                || selectedRecentAudio
+                || 'Áudio selecionado';
+    const modelName = model?.name || 'Modelo de voz';
+    const id = typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const saved = saveCreations([...creations, {
+        id,
+        type: 'covers',
+        title: `${modelName} — ${sourceName}`,
+        modelName,
+        sourceName,
+        imageUrl: model?.image && /^https:\/\//i.test(model.image) ? model.image : '',
+        createdAt: new Date().toISOString(),
+        note: 'Esta versão registra a solicitação, mas ainda não está conectada ao motor que gera e exporta o áudio.'
+    }]);
+    if (saved) renderMyCreations();
+    return saved;
+}
+
+document.querySelectorAll('.creation-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        activeCreationType = tab.dataset.creationType;
+        document.querySelectorAll('.creation-tab').forEach(item => {
+            const isActive = item === tab;
+            item.classList.toggle('active', isActive);
+            item.setAttribute('aria-selected', String(isActive));
+        });
+        renderMyCreations();
+    });
+});
+
 function switchTab(targetId) {
     document.body.classList.toggle('chat-view-active', targetId === 'chat-personagem');
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -1691,6 +1941,7 @@ function switchTab(targetId) {
     const targetTab = document.getElementById(targetId);
     if (targetTab) targetTab.classList.add('active');
     if (targetId === 'favoritos') loadFavorites();
+    if (targetId === 'minhas-criacoes') renderMyCreations();
     if (targetId === 'chat-personagem') renderCharacterChat();
 }
 
@@ -2422,11 +2673,14 @@ async function publishModel() {
 let youtubeConfirmed = false;
 let currentYoutubeData = null;
 let currentStep = 2; // Etapa atual (2 = Áudio, 3 = Ajustes)
+let selectedCoverModelId = null;
+let coverGenerationTimer = null;
 const coverBtnNext = document.getElementById('cover-btn-next');
 const coverBtnBack = document.getElementById('cover-btn-back');
 const generatingOverlay = document.getElementById('generating-overlay');
 
 function openCoverModal(modelId) {
+    selectedCoverModelId = String(modelId || '');
     resetYoutube();
     selectedCoverAudio = false;
     if (coverFileInput) coverFileInput.value = '';
@@ -2444,6 +2698,10 @@ function openCoverModal(modelId) {
 }
 
 function closeCoverModal() {
+    if (coverGenerationTimer !== null) {
+        clearTimeout(coverGenerationTimer);
+        coverGenerationTimer = null;
+    }
     document.getElementById('cover-modal').classList.remove('active');
     document.body.style.overflow = '';
     document.querySelectorAll('.cover-audio-tab').forEach((t, i) => t.classList.toggle('active', i === 0));
@@ -2695,14 +2953,18 @@ function advanceCoverStep() {
     // Transição visual para o Step 3
     goToStep3();
 
-    // Mostra overlay "A gerar..."
+    // Registra a solicitação na biblioteca de criações.
     generatingOverlay.classList.add('active');
 
-    // Simula processamento
-    setTimeout(() => {
+    coverGenerationTimer = setTimeout(() => {
+        coverGenerationTimer = null;
         generatingOverlay.classList.remove('active');
+        const saved = saveCoverCreation();
         closeCoverModal();
-        showToast('Cover gerado com sucesso!', 'success');
+        if (saved) {
+            switchTab('minhas-criacoes');
+            showToast('Solicitação adicionada a Minhas Criações.', 'success');
+        }
     }, 2000);
 }
 
@@ -2933,6 +3195,7 @@ function syncAuthUser(user) {
         favoritesLoadError = '';
         updateAuthUI();
         renderModels();
+        renderMyCreations();
         return;
     }
     const discordIdentity = user.identities?.find(identity => identity.provider === 'discord');
@@ -2953,6 +3216,7 @@ function syncAuthUser(user) {
     updateAuthUI();
     loadFavorites();
     renderModels();
+    renderMyCreations();
 }
 
 supabaseClient.auth.onAuthStateChange((_event, session) => {
@@ -3122,3 +3386,4 @@ window.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+ 
