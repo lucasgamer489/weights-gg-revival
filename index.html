@@ -2014,12 +2014,6 @@ const coverBtnBack = document.getElementById('cover-btn-back');
 const generatingOverlay = document.getElementById('generating-overlay');
 
 function openCoverModal(modelId) {
-    const selectedModel = models.find(model => model.id === modelId);
-    if (selectedModel) {
-        selectedModel.uses = Number(selectedModel.uses || 0) + 1;
-        localStorage.setItem('weightsModels', JSON.stringify(models));
-        renderModels();
-    }
     resetYoutube();
     selectedCoverAudio = false;
     if (coverFileInput) coverFileInput.value = '';
