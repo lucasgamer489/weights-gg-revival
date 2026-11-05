@@ -1890,11 +1890,13 @@ async function streamCharacterReply(model, conversation, assistantMessage, sessi
 
     if (!response.ok) {
         let errorMessage = `A conversa falhou (${response.status}).`;
-        try {
-            const payload = await response.json();
-            if (typeof payload.error === 'string' && payload.error) errorMessage = payload.error;
-        } catch {
-            console.error('A Edge Function retornou uma resposta de erro inválida.');
+        if (response.status !== 503) {
+            try {
+                const payload = await response.json();
+                if (typeof payload.error === 'string' && payload.error) errorMessage = payload.error;
+            } catch {
+                console.error('A Edge Function retornou uma resposta de erro inválida.');
+            }
         }
         throw new Error(errorMessage);
     }
