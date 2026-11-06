@@ -2124,6 +2124,7 @@ let coverJobPollUserId = null;
 let coverJobPollInFlight = false;
 let coverJobPollRequested = false;
 let coverJobPollErrorShown = false;
+let coverJobDeleteErrorShown = false;
 const deletedCoverJobIds = new Set();
 
 function stopCoverJobPolling() {
@@ -2204,15 +2205,25 @@ async function pollCoverJobs(userId) {
             if (job.status === 'failed') {
                 try {
                     const deleted = await deleteCoverQueueJob(String(job.id), userId);
-                    if (deleted) continue;
-                    failedJobDeletePending = true;
-                    console.error(
-                        `O job ${job.id} falhou, mas não foi possível confirmar sua exclusão da fila.`
-                    );
+                    if (!deleted) {
+                        failedJobDeletePending = true;
+                        console.error(
+                            `O job ${job.id} falhou, mas o Supabase não confirmou a exclusão.`
+                        );
+                    }
                 } catch (deleteError) {
                     failedJobDeletePending = true;
                     console.error(`Não foi possível excluir o job ${job.id} que falhou:`, deleteError);
                 }
+                if (failedJobDeletePending && !coverJobDeleteErrorShown) {
+                    showToast(
+                        'A geração falhou. O cover foi removido da lista, mas a exclusão no Supabase será tentada novamente.',
+                        'danger'
+                    );
+                    coverJobDeleteErrorShown = true;
+                }
+                if (!failedJobDeletePending) coverJobDeleteErrorShown = false;
+                continue;
             }
 
             const jobId = String(job.id);
