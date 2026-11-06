@@ -2105,9 +2105,11 @@ function startCoverJobPolling(userId) {
 }
 
 function findModelForQueueJob(job) {
+    const modelId = String(job.model_id || '');
+    const modelUrl = String(job.model_url || '');
     return models.find(model =>
-        model.id === String(job.model_id || '')
-        || model.modelFiles.some(file => file.url === job.model_id)
+        model.id === modelId
+        || model.modelFiles.some(file => file.url === modelUrl)
     );
 }
 
@@ -2119,7 +2121,7 @@ async function pollCoverJobs(userId) {
     try {
         const { data, error } = await supabaseClient
             .from('covers_queue')
-            .select('id,status,result_url,error_message,created_at,model_id,audio_url,youtube_url,user_id')
+            .select('id,status,result_url,error_message,created_at,model_id,model_url,audio_url,youtube_url,user_id')
             .eq('user_id', userId)
             .order('created_at', { ascending: false })
             .limit(100);
@@ -2400,7 +2402,8 @@ async function saveCoverCreation() {
                 id: jobId,
                 user_id: user.id,
                 status: 'pending',
-                model_id: modelUrl,
+                model_id: model.id,
+                model_url: modelUrl,
                 index_url: indexUrl || null,
                 audio_url: audioUrl,
                 youtube_url: youtubeUrl || null,
