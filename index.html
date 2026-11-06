@@ -2106,11 +2106,23 @@ function startCoverJobPolling(userId) {
 
 function findModelForQueueJob(job) {
     const modelId = String(job.model_id || '');
-    const modelUrl = String(job.model_url || '');
+    const modelUrl = String(job.model_url || job.weights_url || '');
     return models.find(model =>
         model.id === modelId
         || model.modelFiles.some(file => file.url === modelUrl)
     );
+}
+
+async function deleteCoverQueueJob(jobId, userId) {
+    const { data, error } = await supabaseClient
+        .from('covers_queue')
+        .delete()
+        .eq('id', jobId)
+        .eq('user_id', userId)
+        .select('id')
+        .maybeSingle();
+    if (error) throw error;
+    return Boolean(data?.id);
 }
 
 async function pollCoverJobs(userId) {
@@ -2138,12 +2150,29 @@ async function pollCoverJobs(userId) {
         const otherCreations = creations.filter(item => item.type !== 'covers');
         const coverItems = [];
 
-        (data || []).forEach(job => {
+        let failedJobDeletePending = false;
+        for (const job of data || []) {
+            if (job.status === 'failed') {
+                try {
+                    const deleted = await deleteCoverQueueJob(String(job.id), userId);
+                    if (deleted) continue;
+                    failedJobDeletePending = true;
+                    console.error(
+                        `O job ${job.id} falhou, mas não foi possível confirmar sua exclusão da fila.`
+                    );
+                } catch (deleteError) {
+                    failedJobDeletePending = true;
+                    console.error(`Não foi possível excluir o job ${job.id} que falhou:`, deleteError);
+                }
+            }
+
             const jobId = String(job.id);
             const previous = byJobId.get(jobId);
             const model = findModelForQueueJob(job);
             const sourceName = previous?.sourceName
-                || (job.youtube_url ? 'YouTube' : 'Áudio enviado');
+                || (job.youtube_url || /^https:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)\//i.test(job.audio_url || '')
+                    ? 'YouTube'
+                    : 'Áudio enviado');
             const modelName = previous?.modelName || model?.name || 'AI Cover';
             const resultUrl = typeof job.result_url === 'string' && /^https:\/\//i.test(job.result_url)
                 ? job.result_url
@@ -2163,7 +2192,7 @@ async function pollCoverJobs(userId) {
                 outputUrl: resultUrl,
                 errorMessage: job.status === 'failed' ? job.error_message || '' : ''
             });
-        });
+        }
 
         const legacyItems = creations.filter(item =>
             item.type === 'covers' && !item.jobId
@@ -2179,7 +2208,8 @@ async function pollCoverJobs(userId) {
             renderMyCreations();
         }
 
-        retry = coverItems.some(item => item.status === 'pending' || item.status === 'processing');
+        retry = failedJobDeletePending
+            || coverItems.some(item => item.status === 'pending' || item.status === 'processing');
         coverJobPollErrorShown = false;
     } catch (error) {
         console.error('Não foi possível sincronizar a fila de covers:', error);
@@ -2392,7 +2422,8 @@ function findModelAsset(model, extension) {
 
 async function saveCoverCreation() {
     let uploadedPath = '';
-    let jobCreated = false;
+    let submittedJobId = '';
+    let submittedUserId = '';
 
     try {
         const { data: authData, error: authError } = await supabaseClient.auth.getUser();
@@ -2442,6 +2473,8 @@ async function saveCoverCreation() {
 
         const sourceName = youtubeUrl ? currentYoutubeData.title : sourceFile.name;
         const jobId = crypto.randomUUID();
+        submittedJobId = jobId;
+        submittedUserId = user.id;
         let audioUrl = null;
         if (sourceFile) {
             const safeName = sanitizeStorageFilename(sourceFile.name);
@@ -2457,23 +2490,22 @@ async function saveCoverCreation() {
             audioUrl = `storage://${COVER_INPUT_BUCKET}/${uploadedPath}`;
         }
 
+        const jobPayload = {
+            id: jobId,
+            user_id: user.id,
+            status: 'pending',
+            model_id: model.id,
+            model_url: modelUrl,
+            index_url: indexUrl || null,
+            pitch: 0,
+            ...(youtubeUrl ? { youtube_url: youtubeUrl } : { audio_url: audioUrl })
+        };
         const { data: job, error: insertError } = await supabaseClient
             .from('covers_queue')
-            .insert({
-                id: jobId,
-                user_id: user.id,
-                status: 'pending',
-                model_id: model.id,
-                model_url: modelUrl,
-                index_url: indexUrl || null,
-                audio_url: audioUrl,
-                youtube_url: youtubeUrl || null,
-                pitch: 0
-            })
+            .insert(jobPayload)
             .select('id,status,created_at')
             .single();
         if (insertError) throw insertError;
-        jobCreated = true;
 
         const item = {
             id: job.id,
@@ -2505,11 +2537,45 @@ async function saveCoverCreation() {
         startCoverJobPolling(user.id);
         return true;
     } catch (error) {
-        if (uploadedPath && !jobCreated) {
-            const { error: cleanupError } = await supabaseClient.storage
-                .from(COVER_INPUT_BUCKET)
-                .remove([uploadedPath]);
-            if (cleanupError) {
+        if (submittedJobId && submittedUserId) {
+            try {
+                const deleted = await deleteCoverQueueJob(submittedJobId, submittedUserId);
+                if (!deleted) {
+                    console.warn(
+                        `Nenhum registro da fila foi removido para o envio malsucedido ${submittedJobId}.`
+                    );
+                }
+            } catch (cleanupError) {
+                console.error(
+                    `Não foi possível remover o registro ${submittedJobId} após falha no envio:`,
+                    cleanupError
+                );
+            }
+
+            try {
+                const creations = readCreations();
+                if (creations) {
+                    saveCreations(creations.filter(item =>
+                        String(item.jobId || item.id) !== submittedJobId
+                    ));
+                    renderMyCreations();
+                }
+            } catch (cleanupError) {
+                console.error(
+                    `Não foi possível limpar a criação local ${submittedJobId}:`,
+                    cleanupError
+                );
+            }
+        }
+        if (uploadedPath) {
+            try {
+                const { error: cleanupError } = await supabaseClient.storage
+                    .from(COVER_INPUT_BUCKET)
+                    .remove([uploadedPath]);
+                if (cleanupError) {
+                    console.error('Não foi possível remover o áudio enviado após falha ao criar o job:', cleanupError);
+                }
+            } catch (cleanupError) {
                 console.error('Não foi possível remover o áudio enviado após falha ao criar o job:', cleanupError);
             }
         }
