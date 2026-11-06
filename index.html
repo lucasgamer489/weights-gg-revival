@@ -2378,7 +2378,7 @@ let collectionModelToAdd = null;
 
 function getCollectionsErrorMessage(error) {
     if (error?.code === 'PGRST205' || error?.code === '42P01') {
-        return 'As tabelas de Coleções ainda não existem. Aplique a migration 20261107090000_voice_collections.sql no Supabase.';
+        return 'As tabelas collections e collection_items ainda não existem. Aplique a migration 20261107090000_voice_collections.sql no Supabase.';
     }
     if (error?.code === '42501') {
         return 'O Supabase bloqueou o acesso às Coleções. Confira as políticas RLS da migration.';
@@ -2392,7 +2392,7 @@ function getCollectionsErrorMessage(error) {
 async function fetchCollectionsData() {
     if (!currentUser) throw new Error('Entre na sua conta para acessar suas Coleções.');
     const { data: collections, error: collectionsError } = await supabaseClient
-        .from('voice_collections')
+        .from('collections')
         .select('id, name, description, created_at')
         .eq('user_id', currentUser.id)
         .order('created_at', { ascending: false });
@@ -2402,7 +2402,7 @@ async function fetchCollectionsData() {
     let memberships = [];
     if (collectionIds.length) {
         const { data, error } = await supabaseClient
-            .from('voice_collection_models')
+            .from('collection_items')
             .select('collection_id, model_id')
             .in('collection_id', collectionIds);
         if (error) throw error;
@@ -2561,6 +2561,7 @@ function openCollectionModal(initialName = '', collection = null) {
 function closeCollectionModal() {
     document.getElementById('collection-modal').classList.remove('active');
     editingCollectionId = null;
+    pendingCollectionModelId = null;
 }
 
 async function saveCollection(name, description) {
@@ -2588,14 +2589,14 @@ async function saveCollection(name, description) {
     try {
         if (editingCollectionId) {
             const { error } = await supabaseClient
-                .from('voice_collections')
+                .from('collections')
                 .update({ name: normalizedName, description: normalizedDescription })
                 .eq('id', editingCollectionId)
                 .eq('user_id', currentUser.id);
             if (error) throw error;
         } else {
             const { data, error } = await supabaseClient
-                .from('voice_collections')
+                .from('collections')
                 .insert({ user_id: currentUser.id, name: normalizedName, description: normalizedDescription })
                 .select('id')
                 .single();
@@ -2622,7 +2623,7 @@ async function deleteCollection(collection) {
     if (!currentUser || !window.confirm(`Excluir a coleção "${collection.name}"? Os modelos não serão apagados.`)) return;
     try {
         const { error } = await supabaseClient
-            .from('voice_collections')
+            .from('collections')
             .delete()
             .eq('id', collection.id)
             .eq('user_id', currentUser.id);
@@ -2672,7 +2673,7 @@ async function addModelToCollection(collectionId, model) {
     if (!currentUser || !model) return;
     try {
         const { error } = await supabaseClient
-            .from('voice_collection_models')
+            .from('collection_items')
             .upsert(
                 { collection_id: collectionId, model_id: model.id },
                 { onConflict: 'collection_id,model_id', ignoreDuplicates: true }
