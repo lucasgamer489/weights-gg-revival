@@ -2431,11 +2431,12 @@ function getVoiceModelAssetUrl(asset) {
 }
 
 function validateHuggingFaceModelUrl(value) {
+    const cleanedValue = String(value || '').trim().replace(/^[\s:]+/, '');
     let url;
     try {
-        url = new URL(String(value || '').trim());
+        url = new URL(cleanedValue);
     } catch {
-        throw new Error('Informe um link direto válido para o arquivo .pth ou .zip do modelo.');
+        throw new Error('Informe um link direto válido para o arquivo .pth, .zip ou .index do modelo.');
     }
 
     let pathname;
@@ -2445,12 +2446,22 @@ function validateHuggingFaceModelUrl(value) {
         throw new Error('O link do modelo contém caracteres inválidos.');
     }
 
+    if (['huggingface.co', 'www.huggingface.co'].includes(url.hostname.toLowerCase())) {
+        url.pathname = url.pathname.replace(/\/blob\//i, '/resolve/');
+    }
+
+    try {
+        pathname = decodeURIComponent(url.pathname);
+    } catch {
+        throw new Error('O link do modelo contém caracteres inválidos.');
+    }
+
     if (
         url.protocol !== 'https:'
         || !['huggingface.co', 'www.huggingface.co'].includes(url.hostname.toLowerCase())
-        || !/\/resolve\/[^/]+\/.+\.(?:pth|zip)$/i.test(pathname)
+        || !/\/resolve\/[^/]+\/.+\.(?:pth|zip|index)$/i.test(pathname)
     ) {
-        throw new Error('Use um link direto do Hugging Face terminado em .pth ou .zip, no formato https://huggingface.co/.../resolve/main/arquivo.pth ou arquivo.zip.');
+        throw new Error('Use um link do Hugging Face terminado em .pth, .zip ou .index, no formato https://huggingface.co/.../resolve/main/arquivo.pth.');
     }
 
     return url.toString();
@@ -3217,7 +3228,7 @@ importModalForm.addEventListener('submit', async event => {
     const name = document.getElementById('modal-model-name').value.trim();
     const categorySelect = document.getElementById('modal-model-category');
     const category = categorySelect.value;
-    const modelUrl = document.getElementById('modal-model-url').value.trim();
+    let modelUrl = document.getElementById('modal-model-url').value;
     const files = Array.from(modalModelFiles.files);
     if (!name) {
         showToast('Informe o nome da voz.', 'danger');
@@ -3229,7 +3240,8 @@ importModalForm.addEventListener('submit', async event => {
     }
     if (modelUrl) {
         try {
-            validateHuggingFaceModelUrl(modelUrl);
+            modelUrl = validateHuggingFaceModelUrl(modelUrl);
+            document.getElementById('modal-model-url').value = modelUrl;
         } catch (error) {
             showToast(error.message, 'danger');
             return;
@@ -3370,7 +3382,7 @@ async function publishModel() {
     if (!tags.length) tags.push('RVC V2');
 
     const activeImportTab = document.querySelector('.import-tab.active')?.dataset.importTab || 'link';
-    const sourceUrl = activeImportTab === 'link' ? document.getElementById('import-url').value.trim() : '';
+    let sourceUrl = activeImportTab === 'link' ? document.getElementById('import-url').value : '';
     const files = activeImportTab === 'file' ? selectedModelFiles : [];
     if (!files.length && !sourceUrl) {
         showToast('Selecione arquivos RVC ou informe um link direto do Hugging Face para um arquivo .pth ou .zip.', 'danger');
@@ -3378,7 +3390,8 @@ async function publishModel() {
     }
     if (sourceUrl) {
         try {
-            validateHuggingFaceModelUrl(sourceUrl);
+            sourceUrl = validateHuggingFaceModelUrl(sourceUrl);
+            document.getElementById('import-url').value = sourceUrl;
         } catch (error) {
             showToast(error.message, 'danger');
             return;
