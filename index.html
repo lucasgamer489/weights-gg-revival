@@ -2047,13 +2047,18 @@ function renderMyCreations() {
         const removeButton = document.createElement('button');
         removeButton.className = 'creation-delete';
         removeButton.type = 'button';
-        removeButton.title = 'Remover do histórico';
-        removeButton.setAttribute('aria-label', `Remover ${item.title} do histórico`);
+        removeButton.title = item.type === 'covers' && item.jobId
+            ? 'Excluir cover permanentemente'
+            : 'Remover do histórico';
+        removeButton.setAttribute(
+            'aria-label',
+            item.type === 'covers' && item.jobId
+                ? `Excluir ${item.title} permanentemente`
+                : `Remover ${item.title} do histórico`
+        );
         removeButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5L8 4H5v2h14V4z"/></svg>';
         removeButton.addEventListener('click', () => {
-            if (!confirm('Remover esta criação do histórico deste navegador?')) return;
-            saveCreations(creations.filter(creation => creation.id !== item.id));
-            renderMyCreations();
+            void removeCreation(item, removeButton);
         });
         actions.append(removeButton);
         row.append(thumb, info, actions);
@@ -2072,11 +2077,54 @@ function saveCreations(creations) {
     }
 }
 
+async function removeCreation(item, button) {
+    const isQueueJob = item.type === 'covers' && item.jobId;
+    const confirmation = isQueueJob
+        ? 'Excluir este cover permanentemente da fila e do seu histórico?'
+        : 'Remover esta criação do histórico deste navegador?';
+    if (!confirm(confirmation)) return;
+
+    button.disabled = true;
+    try {
+        if (isQueueJob) {
+            const userId = currentUser?.id;
+            if (!userId) throw new Error('Entre na sua conta para excluir este cover.');
+            const deleted = await deleteCoverQueueJob(String(item.jobId), userId);
+            if (!deleted) {
+                throw new Error(
+                    'O cover não foi excluído. Verifique se a migration de exclusão da fila foi aplicada no Supabase.'
+                );
+            }
+            deletedCoverJobIds.add(String(item.jobId));
+        }
+
+        const latestCreations = readCreations();
+        if (!latestCreations) {
+            throw new Error('O registro foi removido, mas não foi possível ler o histórico local.');
+        }
+        if (!saveCreations(latestCreations.filter(creation =>
+            isQueueJob
+                ? String(creation.jobId || '') !== String(item.jobId)
+                : creation.id !== item.id
+        ))) {
+            throw new Error('O registro foi removido, mas o histórico local não pôde ser atualizado.');
+        }
+        renderMyCreations();
+        showToast(isQueueJob ? 'Cover excluído permanentemente.' : 'Criação removida do histórico.', 'success');
+    } catch (error) {
+        console.error(`Não foi possível excluir a criação ${item.id}:`, error);
+        showToast(`Não foi possível excluir: ${error.message || 'tente novamente.'}`, 'danger');
+    } finally {
+        if (button.isConnected) button.disabled = false;
+    }
+}
+
 let coverJobPollTimer = null;
 let coverJobPollUserId = null;
 let coverJobPollInFlight = false;
 let coverJobPollRequested = false;
 let coverJobPollErrorShown = false;
+const deletedCoverJobIds = new Set();
 
 function stopCoverJobPolling() {
     if (coverJobPollTimer !== null) {
@@ -2152,6 +2200,7 @@ async function pollCoverJobs(userId) {
 
         let failedJobDeletePending = false;
         for (const job of data || []) {
+            if (deletedCoverJobIds.has(String(job.id))) continue;
             if (job.status === 'failed') {
                 try {
                     const deleted = await deleteCoverQueueJob(String(job.id), userId);
