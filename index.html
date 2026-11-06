@@ -152,13 +152,34 @@ body { background-color: var(--bg-main); color: var(--text-main); height: 100vh;
 .collection-suggestion-list { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
 .collection-suggestion { padding: 10px 15px; border: 1px solid var(--border-color); border-radius: 9999px; background: var(--bg-card); color: var(--text-sidebar); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s ease; }
 .collection-suggestion:hover { border-color: var(--accent-primary); background: var(--accent-light); color: var(--accent-primary); transform: translateY(-1px); }
-.collections-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
-.collection-card { display: flex; align-items: center; gap: 14px; min-width: 0; padding: 18px; border: 1px solid var(--border-color); border-radius: 16px; background: var(--bg-card); box-shadow: var(--shadow-sm); }
+.collections-toolbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+.collections-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
+.collection-card { display: flex; align-items: center; gap: 14px; min-width: 0; padding: 18px; border: 1px solid var(--border-color); border-radius: 16px; background: var(--bg-card); box-shadow: var(--shadow-sm); transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease; }
+.collection-card:hover { transform: translateY(-2px); border-color: #CBD5E1; box-shadow: var(--shadow-md); }
+.collection-card-open { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; padding: 0; border: 0; background: transparent; text-align: left; cursor: pointer; font: inherit; }
 .collection-card-icon { width: 46px; height: 46px; flex: 0 0 46px; display: grid; place-items: center; border-radius: 13px; background: var(--accent-light); color: var(--accent-primary); }
 .collection-card-icon svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .collection-card-info { min-width: 0; }
-.collection-card-info h2 { overflow: hidden; color: var(--text-main); font-size: 15px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
-.collection-card-info p { margin-top: 5px; color: var(--text-muted); font-size: 12px; }
+.collection-card-name { display: block; overflow: hidden; color: var(--text-main); font-size: 15px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.collection-card-count { display: block; margin-top: 5px; color: var(--text-muted); font-size: 12px; }
+.collection-card-actions { display: flex; gap: 5px; flex-shrink: 0; }
+.collection-card-action { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--border-color); border-radius: 9px; background: var(--bg-card); color: var(--text-muted); cursor: pointer; transition: all 0.15s ease; }
+.collection-card-action:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
+.collection-card-action.danger:hover { border-color: #FECACA; background: #FEF2F2; color: var(--danger); }
+.collection-card-action svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.collection-detail { margin-top: 8px; }
+.collection-detail-header { display: flex; align-items: center; justify-content: flex-start; gap: 16px; margin-bottom: 20px; }
+.collection-detail-copy { min-width: 0; }
+.collection-detail-copy h2 { color: var(--text-main); font-size: 22px; font-weight: 800; }
+.collection-detail-copy p { margin-top: 5px; color: var(--text-muted); font-size: 14px; }
+.collection-back-button, .collection-model-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 9999px; background: var(--bg-card); color: var(--text-main); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.15s ease; }
+.collection-back-button:hover, .collection-model-button:hover { border-color: var(--accent-primary); background: var(--accent-light); }
+.collection-back-button svg, .collection-model-button svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.collection-model-button { padding: 7px 10px; font-size: 12px; }
+.collection-model-button:disabled { opacity: 0.5; cursor: not-allowed; }
+.collection-modal-field textarea { width: 100%; min-height: 92px; resize: vertical; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 10px; outline: none; background: var(--bg-main); color: var(--text-main); font: inherit; font-size: 14px; }
+.collection-modal-field textarea:focus { border-color: var(--accent-primary); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12); }
+.collection-select { width: 100%; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-main); color: var(--text-main); font: inherit; }
 .collection-modal-overlay { position: fixed; inset: 0; z-index: 5500; display: none; align-items: center; justify-content: center; padding: 20px; background: var(--overlay); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
 .collection-modal-overlay.active { display: flex; animation: coverFadeIn 0.2s; }
 .collection-modal { width: 100%; max-width: 460px; padding: 28px; border: 1px solid var(--border-color); border-radius: 20px; background: var(--bg-card); box-shadow: var(--shadow-xl); animation: coverSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -176,6 +197,9 @@ body { background-color: var(--bg-main); color: var(--text-main); height: 100vh;
 .collection-modal-actions .import-cancel { padding: 11px 18px; }
 .collection-modal-actions .collection-create-button { padding: 11px 18px; }
 @media (max-width: 520px) {
+    .collections-toolbar { align-items: flex-start; }
+    .collections-toolbar .collection-create-button { padding: 10px 13px; font-size: 12px; white-space: nowrap; }
+    .collection-detail-header { align-items: flex-start; flex-direction: column; }
     .collections-empty-state { margin-top: 20px; border-radius: 18px; }
     .collection-suggestion-list { flex-direction: column; }
     .collection-suggestion { width: 100%; }
@@ -1066,7 +1090,13 @@ body.dark-mode .cover-upload-zone[style*="rgb(16, 185, 129)"] { background: #173
         </div>
 
         <div id="colecoes" class="tab-pane">
-            <div class="page-header"><h1>Coleções</h1><p>Suas coleções de modelos</p></div>
+            <div class="collections-toolbar">
+                <div class="page-header"><h1>Coleções</h1><p>Organize seus modelos de voz em pastas personalizadas.</p></div>
+                <button class="collection-create-button" id="open-collection-modal-page" type="button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                    + Nova Coleção
+                </button>
+            </div>
             <section class="collections-empty-state" id="collections-empty-state" aria-labelledby="collections-empty-title">
                 <div class="collections-empty-icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24"><path d="M3 7.5A1.5 1.5 0 0 1 4.5 6H10l2 2h7.5A1.5 1.5 0 0 1 21 9.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/><path d="M3 10h18"/></svg>
@@ -1087,6 +1117,19 @@ body.dark-mode .cover-upload-zone[style*="rgb(16, 185, 129)"] { background: #173
                 </div>
             </section>
             <div class="collections-grid" id="collections-grid" aria-live="polite" hidden></div>
+            <section class="collection-detail" id="collection-detail" hidden>
+                <div class="collection-detail-header">
+                    <button class="collection-back-button" id="collection-back-button" type="button">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6M9 12h12"/></svg>
+                        Todas as coleções
+                    </button>
+                    <div class="collection-detail-copy">
+                        <h2 id="collection-detail-name"></h2>
+                        <p id="collection-detail-description"></p>
+                    </div>
+                </div>
+                <div class="grid" id="collection-models-grid"></div>
+            </section>
         </div>
 
         <div id="chat-personagem" class="tab-pane">
@@ -1142,9 +1185,35 @@ body.dark-mode .cover-upload-zone[style*="rgb(16, 185, 129)"] { background: #173
             <label for="collection-name">Nome da coleção</label>
             <input id="collection-name" name="name" type="text" maxlength="50" placeholder="Ex.: Jogos favoritos" required>
         </div>
+        <div class="collection-modal-field">
+            <label for="collection-description">Descrição (opcional)</label>
+            <textarea id="collection-description" name="description" maxlength="240" placeholder="Descreva os modelos desta coleção"></textarea>
+        </div>
         <div class="collection-modal-actions">
             <button class="import-cancel" id="cancel-collection-modal" type="button">Cancelar</button>
-            <button class="collection-create-button" type="submit">Criar coleção</button>
+            <button class="collection-create-button" id="collection-submit-button" type="submit">Criar coleção</button>
+        </div>
+    </form>
+</div>
+
+<div class="collection-modal-overlay" id="add-model-collection-modal" role="dialog" aria-modal="true" aria-labelledby="add-model-collection-title">
+    <form class="collection-modal" id="add-model-collection-form">
+        <div class="collection-modal-heading">
+            <div>
+                <h2 id="add-model-collection-title">Adicionar à coleção</h2>
+                <p id="add-model-collection-description">Escolha onde organizar este modelo.</p>
+            </div>
+            <button class="collection-modal-close" id="close-add-model-collection" type="button" aria-label="Fechar">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10 10.59 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+            </button>
+        </div>
+        <div class="collection-modal-field">
+            <label for="model-collection-select">Coleção</label>
+            <select class="collection-select" id="model-collection-select" required></select>
+        </div>
+        <div class="collection-modal-actions">
+            <button class="import-cancel" id="cancel-add-model-collection" type="button">Cancelar</button>
+            <button class="collection-create-button" id="add-model-collection-submit" type="submit">Adicionar</button>
         </div>
     </form>
 </div>
@@ -1534,6 +1603,9 @@ function renderModelCards(grid, modelList) {
                             <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                             <span class="like-count">${formatCount(model.likes)}</span>
                         </button>
+                        <button class="collection-model-button" type="button" aria-label="Adicionar ${escapeHTML(model.name)} à coleção" title="Adicionar à coleção">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7.5A1.5 1.5 0 0 1 4.5 6H10l2 2h7.5A1.5 1.5 0 0 1 21 9.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/><path d="M3 10h18M12 12v5m-2.5-2.5h5"/></svg>
+                        </button>
                     </div>
                     <button class="use-btn" type="button">
                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -1554,6 +1626,7 @@ function renderModelCards(grid, modelList) {
             card.querySelector('.play-button').addEventListener('click', event => togglePlay(model.id, event.currentTarget));
         }
         card.querySelector('.likes').addEventListener('click', () => toggleFavorite(model.id));
+        card.querySelector('.collection-model-button').addEventListener('click', () => openAddModelToCollection(model));
         card.querySelector('.use-btn').addEventListener('click', () => openCoverModal(model.id));
         grid.appendChild(card);
     });
@@ -1688,12 +1761,14 @@ async function loadVoiceModels() {
         }
         modelsLoading = false;
         renderModels();
+        if (selectedCollectionId) renderCollectionDetail();
     } catch (error) {
         console.error('Não foi possível carregar os modelos do Supabase:', error);
         models = [];
         modelsLoading = false;
         modelsLoadError = true;
         renderModels();
+        if (selectedCollectionId) renderCollectionDetail();
         showToast('Erro ao carregar modelos. Confira a tabela voice_models e as permissões de leitura no Supabase.', 'danger');
     }
 }
@@ -2293,132 +2368,367 @@ async function pollCoverJobs(userId) {
     }
 }
 
-function getCollectionsStorageKey() {
-    return `weightsCollections:${currentUser?.id || 'guest'}`;
+let userCollections = [];
+let collectionMemberships = [];
+let selectedCollectionId = null;
+let editingCollectionId = null;
+let pendingCollectionModelId = null;
+let collectionLoadRequest = 0;
+let collectionModelToAdd = null;
+
+function getCollectionsErrorMessage(error) {
+    if (error?.code === 'PGRST205' || error?.code === '42P01') {
+        return 'As tabelas de Coleções ainda não existem. Aplique a migration 20261107090000_voice_collections.sql no Supabase.';
+    }
+    if (error?.code === '42501') {
+        return 'O Supabase bloqueou o acesso às Coleções. Confira as políticas RLS da migration.';
+    }
+    const details = [error?.code, error?.message].filter(Boolean).join(': ');
+    return details
+        ? `Não foi possível acessar as Coleções (${details}). Confira o erro no Console do navegador.`
+        : 'Não foi possível acessar as Coleções. Confira o erro no Console do navegador.';
 }
 
-function readCollections() {
+async function fetchCollectionsData() {
+    if (!currentUser) throw new Error('Entre na sua conta para acessar suas Coleções.');
+    const { data: collections, error: collectionsError } = await supabaseClient
+        .from('voice_collections')
+        .select('id, name, description, created_at')
+        .eq('user_id', currentUser.id)
+        .order('created_at', { ascending: false });
+    if (collectionsError) throw collectionsError;
+
+    const collectionIds = collections.map(collection => collection.id);
+    let memberships = [];
+    if (collectionIds.length) {
+        const { data, error } = await supabaseClient
+            .from('voice_collection_models')
+            .select('collection_id, model_id')
+            .in('collection_id', collectionIds);
+        if (error) throw error;
+        memberships = data || [];
+    }
+    return { collections, memberships };
+}
+
+async function renderCollections() {
+    const emptyState = document.getElementById('collections-empty-state');
+    const grid = document.getElementById('collections-grid');
+    const detail = document.getElementById('collection-detail');
+    if (!emptyState || !grid || !detail) return;
+
+    const requestId = ++collectionLoadRequest;
+    selectedCollectionId = null;
+    detail.hidden = true;
+    grid.hidden = false;
+    grid.replaceChildren();
+    emptyState.hidden = true;
+    if (!currentUser) {
+        const message = document.createElement('p');
+        message.className = 'creation-empty';
+        message.textContent = 'Entre na sua conta para criar e acessar suas Coleções.';
+        grid.append(message);
+        return;
+    }
+    const loading = document.createElement('p');
+    loading.className = 'creation-empty';
+    loading.textContent = 'Carregando suas Coleções...';
+    grid.append(loading);
+
     try {
-        const saved = localStorage.getItem(getCollectionsStorageKey());
-        if (!saved) return [];
-        const parsed = JSON.parse(saved);
-        if (!Array.isArray(parsed)) throw new Error('As coleções salvas não estão em uma lista válida.');
-        return parsed.filter(collection =>
-            collection
-            && typeof collection.id === 'string'
-            && typeof collection.name === 'string'
-            && typeof collection.createdAt === 'string'
-        );
+        const result = await fetchCollectionsData();
+        if (requestId !== collectionLoadRequest) return;
+        userCollections = result.collections;
+        collectionMemberships = result.memberships;
+        renderCollectionCards();
     } catch (error) {
-        console.error('Não foi possível ler as Coleções:', error);
-        return null;
+        if (requestId !== collectionLoadRequest) return;
+        console.error('Não foi possível carregar as Coleções:', error);
+        grid.replaceChildren();
+        const errorState = document.createElement('p');
+        errorState.className = 'creation-empty';
+        errorState.textContent = getCollectionsErrorMessage(error);
+        grid.append(errorState);
+        grid.hidden = false;
+        emptyState.hidden = true;
+        showToast(getCollectionsErrorMessage(error), 'danger');
     }
 }
 
-function saveCollections(collections) {
-    try {
-        localStorage.setItem(getCollectionsStorageKey(), JSON.stringify(collections));
-        return true;
-    } catch (error) {
-        console.error('Não foi possível salvar as Coleções:', error);
-        showToast('Não foi possível salvar as coleções neste navegador.', 'danger');
-        return false;
-    }
-}
-
-function renderCollections() {
+function renderCollectionCards() {
     const emptyState = document.getElementById('collections-empty-state');
     const grid = document.getElementById('collections-grid');
     if (!emptyState || !grid) return;
-
-    const collections = readCollections();
     grid.replaceChildren();
-    if (!collections) {
-        emptyState.hidden = true;
-        grid.hidden = false;
-        const errorState = document.createElement('p');
-        errorState.className = 'creation-empty';
-        errorState.textContent = 'Não foi possível carregar suas coleções salvas neste navegador.';
-        grid.append(errorState);
-        return;
-    }
+    emptyState.hidden = userCollections.length > 0;
+    grid.hidden = userCollections.length === 0;
+    userCollections.forEach(collection => {
+        const card = document.createElement('article');
+        card.className = 'collection-card';
 
-    emptyState.hidden = collections.length > 0;
-    grid.hidden = collections.length === 0;
-    collections
-        .slice()
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-        .forEach(collection => {
-            const card = document.createElement('article');
-            card.className = 'collection-card';
-            const icon = document.createElement('div');
-            icon.className = 'collection-card-icon';
-            icon.setAttribute('aria-hidden', 'true');
-            icon.innerHTML = '<svg viewBox="0 0 24 24"><path d="M3 7.5A1.5 1.5 0 0 1 4.5 6H10l2 2h7.5A1.5 1.5 0 0 1 21 9.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/><path d="M3 10h18"/></svg>';
-            const info = document.createElement('div');
-            info.className = 'collection-card-info';
-            const name = document.createElement('h2');
-            name.textContent = collection.name;
-            const count = document.createElement('p');
-            count.textContent = '0 modelos';
-            info.append(name, count);
-            card.append(icon, info);
-            grid.append(card);
-        });
+        const open = document.createElement('button');
+        open.className = 'collection-card-open';
+        open.type = 'button';
+        open.setAttribute('aria-label', `Abrir coleção ${collection.name}`);
+        const icon = document.createElement('span');
+        icon.className = 'collection-card-icon';
+        icon.setAttribute('aria-hidden', 'true');
+        icon.innerHTML = '<svg viewBox="0 0 24 24"><path d="M3 7.5A1.5 1.5 0 0 1 4.5 6H10l2 2h7.5A1.5 1.5 0 0 1 21 9.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/><path d="M3 10h18"/></svg>';
+        const info = document.createElement('span');
+        info.className = 'collection-card-info';
+        const name = document.createElement('span');
+        name.className = 'collection-card-name';
+        name.textContent = collection.name;
+        const count = document.createElement('span');
+        count.className = 'collection-card-count';
+        const modelCount = collectionMemberships.filter(item => item.collection_id === collection.id).length;
+        count.textContent = `${modelCount} ${modelCount === 1 ? 'modelo' : 'modelos'}`;
+        info.append(name, count);
+        open.append(icon, info);
+        open.addEventListener('click', () => openCollection(collection.id));
+
+        const actions = document.createElement('div');
+        actions.className = 'collection-card-actions';
+        const edit = document.createElement('button');
+        edit.className = 'collection-card-action';
+        edit.type = 'button';
+        edit.title = 'Editar coleção';
+        edit.setAttribute('aria-label', `Editar coleção ${collection.name}`);
+        edit.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>';
+        edit.addEventListener('click', () => openCollectionModal('', collection));
+        const remove = document.createElement('button');
+        remove.className = 'collection-card-action danger';
+        remove.type = 'button';
+        remove.title = 'Excluir coleção';
+        remove.setAttribute('aria-label', `Excluir coleção ${collection.name}`);
+        remove.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m5 4v6m4-6v6"/></svg>';
+        remove.addEventListener('click', () => deleteCollection(collection));
+        actions.append(edit, remove);
+        card.append(open, actions);
+        grid.append(card);
+    });
 }
 
-function openCollectionModal(initialName = '') {
+function openCollection(collectionId) {
+    selectedCollectionId = collectionId;
+    document.getElementById('collections-empty-state').hidden = true;
+    document.getElementById('collections-grid').hidden = true;
+    document.getElementById('collection-detail').hidden = false;
+    renderCollectionDetail();
+}
+
+function renderCollectionDetail() {
+    const collection = userCollections.find(item => item.id === selectedCollectionId);
+    const grid = document.getElementById('collection-models-grid');
+    if (!collection || !grid) return;
+    document.getElementById('collection-detail-name').textContent = collection.name;
+    document.getElementById('collection-detail-description').textContent = collection.description || 'Modelos organizados nesta coleção.';
+    grid.replaceChildren();
+    if (modelsLoading) {
+        grid.innerHTML = '<div class="empty-models">Carregando modelos de voz...</div>';
+        return;
+    }
+    const modelIds = new Set(collectionMemberships
+        .filter(item => item.collection_id === collection.id)
+        .map(item => String(item.model_id)));
+    const collectionModels = models.filter(model => modelIds.has(String(model.id)));
+    if (collectionModels.length) {
+        renderModelCards(grid, collectionModels);
+    } else {
+        const empty = document.createElement('div');
+        empty.className = 'creation-empty';
+        empty.innerHTML = '<strong>Esta coleção ainda está vazia</strong>Adicione modelos usando o botão de pasta nos cards de voz.';
+        grid.append(empty);
+    }
+}
+
+function openCollectionModal(initialName = '', collection = null) {
+    if (!currentUser) {
+        showToast('Entre na sua conta para criar ou editar Coleções.', 'danger');
+        openLoginModal();
+        return;
+    }
+    editingCollectionId = collection?.id || null;
     const modal = document.getElementById('collection-modal');
-    const input = document.getElementById('collection-name');
-    input.value = initialName;
+    document.getElementById('collection-modal-title').textContent = collection ? 'Editar coleção' : 'Criar nova coleção';
+    document.getElementById('collection-name').value = collection?.name || initialName;
+    document.getElementById('collection-description').value = collection?.description || '';
+    document.getElementById('collection-submit-button').textContent = collection ? 'Salvar alterações' : 'Criar coleção';
     modal.classList.add('active');
-    input.focus();
+    document.getElementById('collection-name').focus();
 }
 
 function closeCollectionModal() {
     document.getElementById('collection-modal').classList.remove('active');
+    editingCollectionId = null;
 }
 
-function createCollection(name) {
+async function saveCollection(name, description) {
     const normalizedName = name.trim();
-    if (!normalizedName) return false;
-
-    const collections = readCollections();
-    if (!collections) {
-        showToast('Não foi possível carregar suas coleções. Tente novamente.', 'danger');
+    const normalizedDescription = description.trim();
+    if (!normalizedName) {
+        showToast('Informe um nome para a coleção.', 'danger');
         return false;
     }
-    if (collections.some(collection => collection.name.toLocaleLowerCase() === normalizedName.toLocaleLowerCase())) {
+    if (!currentUser) {
+        showToast('Entre na sua conta para salvar Coleções.', 'danger');
+        return false;
+    }
+    const duplicate = userCollections.some(collection =>
+        collection.id !== editingCollectionId
+        && collection.name.toLocaleLowerCase() === normalizedName.toLocaleLowerCase()
+    );
+    if (duplicate) {
         showToast('Você já tem uma coleção com esse nome.', 'danger');
         return false;
     }
 
-    const id = typeof crypto.randomUUID === 'function'
-        ? crypto.randomUUID()
-        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    if (!saveCollections([...collections, { id, name: normalizedName, createdAt: new Date().toISOString() }])) return false;
-    renderCollections();
-    showToast(`Coleção "${normalizedName}" criada!`, 'success');
-    return true;
+    let createdCollectionId = null;
+    const modelIdToAdd = editingCollectionId ? null : pendingCollectionModelId;
+    try {
+        if (editingCollectionId) {
+            const { error } = await supabaseClient
+                .from('voice_collections')
+                .update({ name: normalizedName, description: normalizedDescription })
+                .eq('id', editingCollectionId)
+                .eq('user_id', currentUser.id);
+            if (error) throw error;
+        } else {
+            const { data, error } = await supabaseClient
+                .from('voice_collections')
+                .insert({ user_id: currentUser.id, name: normalizedName, description: normalizedDescription })
+                .select('id')
+                .single();
+            if (error) throw error;
+            createdCollectionId = data.id;
+        }
+        pendingCollectionModelId = null;
+        closeCollectionModal();
+        await renderCollections();
+        showToast(`Coleção "${normalizedName}" salva!`, 'success');
+        if (modelIdToAdd && createdCollectionId) {
+            const model = models.find(item => String(item.id) === String(modelIdToAdd));
+            if (model) await addModelToCollection(createdCollectionId, model);
+        }
+        return true;
+    } catch (error) {
+        console.error('Não foi possível salvar a Coleção:', error);
+        showToast(getCollectionsErrorMessage(error), 'danger');
+        return false;
+    }
+}
+
+async function deleteCollection(collection) {
+    if (!currentUser || !window.confirm(`Excluir a coleção "${collection.name}"? Os modelos não serão apagados.`)) return;
+    try {
+        const { error } = await supabaseClient
+            .from('voice_collections')
+            .delete()
+            .eq('id', collection.id)
+            .eq('user_id', currentUser.id);
+        if (error) throw error;
+        if (selectedCollectionId === collection.id) selectedCollectionId = null;
+        await renderCollections();
+        showToast(`Coleção "${collection.name}" excluída.`, 'success');
+    } catch (error) {
+        console.error('Não foi possível excluir a Coleção:', error);
+        showToast(getCollectionsErrorMessage(error), 'danger');
+    }
+}
+
+async function openAddModelToCollection(model) {
+    if (!currentUser) {
+        showToast('Entre na sua conta para adicionar modelos às Coleções.', 'danger');
+        openLoginModal();
+        return;
+    }
+    try {
+        const data = await fetchCollectionsData();
+        userCollections = data.collections;
+        collectionMemberships = data.memberships;
+        if (!userCollections.length) {
+            pendingCollectionModelId = model.id;
+            openCollectionModal();
+            showToast('Crie uma coleção para organizar este modelo.', 'success');
+            return;
+        }
+        collectionModelToAdd = model;
+        document.getElementById('add-model-collection-description').textContent = `Escolha uma coleção para ${model.name}.`;
+        const select = document.getElementById('model-collection-select');
+        select.replaceChildren(...userCollections.map(collection => new Option(collection.name, collection.id)));
+        document.getElementById('add-model-collection-modal').classList.add('active');
+    } catch (error) {
+        console.error('Não foi possível carregar as Coleções para associação:', error);
+        showToast(getCollectionsErrorMessage(error), 'danger');
+    }
+}
+
+function closeAddModelCollectionModal() {
+    document.getElementById('add-model-collection-modal').classList.remove('active');
+    collectionModelToAdd = null;
+}
+
+async function addModelToCollection(collectionId, model) {
+    if (!currentUser || !model) return;
+    try {
+        const { error } = await supabaseClient
+            .from('voice_collection_models')
+            .upsert(
+                { collection_id: collectionId, model_id: model.id },
+                { onConflict: 'collection_id,model_id', ignoreDuplicates: true }
+            );
+        if (error) throw error;
+        const result = await fetchCollectionsData();
+        userCollections = result.collections;
+        collectionMemberships = result.memberships;
+        renderCollectionCards();
+        if (selectedCollectionId) renderCollectionDetail();
+        showToast(`"${model.name}" adicionado à coleção.`, 'success');
+    } catch (error) {
+        console.error('Não foi possível adicionar o modelo à Coleção:', error);
+        showToast(getCollectionsErrorMessage(error), 'danger');
+    }
 }
 
 document.getElementById('open-collection-modal').addEventListener('click', () => openCollectionModal());
+document.getElementById('open-collection-modal-page').addEventListener('click', () => openCollectionModal());
+document.getElementById('collection-back-button').addEventListener('click', () => {
+    selectedCollectionId = null;
+    document.getElementById('collection-detail').hidden = true;
+    document.getElementById('collections-grid').hidden = userCollections.length === 0;
+    document.getElementById('collections-empty-state').hidden = userCollections.length > 0;
+});
 document.getElementById('close-collection-modal').addEventListener('click', closeCollectionModal);
 document.getElementById('cancel-collection-modal').addEventListener('click', closeCollectionModal);
 document.getElementById('collection-modal').addEventListener('click', event => {
     if (event.target === event.currentTarget) closeCollectionModal();
 });
-document.getElementById('collection-form').addEventListener('submit', event => {
+document.getElementById('collection-form').addEventListener('submit', async event => {
     event.preventDefault();
-    const name = document.getElementById('collection-name').value;
-    if (createCollection(name)) closeCollectionModal();
+    await saveCollection(
+        document.getElementById('collection-name').value,
+        document.getElementById('collection-description').value
+    );
 });
 document.querySelectorAll('.collection-suggestion').forEach(button => {
-    button.addEventListener('click', () => createCollection(button.dataset.collectionName));
+    button.addEventListener('click', () => openCollectionModal(button.dataset.collectionName));
+});
+document.getElementById('close-add-model-collection').addEventListener('click', closeAddModelCollectionModal);
+document.getElementById('cancel-add-model-collection').addEventListener('click', closeAddModelCollectionModal);
+document.getElementById('add-model-collection-modal').addEventListener('click', event => {
+    if (event.target === event.currentTarget) closeAddModelCollectionModal();
+});
+document.getElementById('add-model-collection-form').addEventListener('submit', async event => {
+    event.preventDefault();
+    const model = collectionModelToAdd;
+    const collectionId = document.getElementById('model-collection-select').value;
+    closeAddModelCollectionModal();
+    await addModelToCollection(collectionId, model);
 });
 document.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && document.getElementById('collection-modal').classList.contains('active')) {
-        closeCollectionModal();
+    if (event.key === 'Escape') {
+        if (document.getElementById('collection-modal').classList.contains('active')) closeCollectionModal();
+        if (document.getElementById('add-model-collection-modal').classList.contains('active')) closeAddModelCollectionModal();
     }
 });
 
@@ -3956,6 +4266,7 @@ function syncAuthUser(user) {
         updateAuthUI();
         renderModels();
         renderMyCreations();
+        if (document.getElementById('colecoes')?.classList.contains('active')) void renderCollections();
         return;
     }
     const discordIdentity = user.identities?.find(identity => identity.provider === 'discord');
@@ -3978,6 +4289,7 @@ function syncAuthUser(user) {
     loadFavorites();
     renderModels();
     renderMyCreations();
+    if (document.getElementById('colecoes')?.classList.contains('active')) void renderCollections();
 }
 
 supabaseClient.auth.onAuthStateChange((_event, session) => {
