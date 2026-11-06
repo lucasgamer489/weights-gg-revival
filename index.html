@@ -1006,7 +1006,7 @@ body.dark-mode .cover-upload-zone[style*="rgb(16, 185, 129)"] { background: #173
                         <div class="import-tab-content active" id="import-tab-link">
                             <div class="import-field">
                                 <label>URL do Modelo <span class="required">*</span></label>
-                                <input type="url" id="import-url" placeholder="https://huggingface.co/usuario/modelo/resolve/main/modelo.pth">
+                                <input type="url" id="import-url" placeholder="https://huggingface.co/usuario/modelo/resolve/main/modelo.pth ou modelo.zip">
                             </div>
                             <div class="import-hint">
                                 <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
@@ -1180,7 +1180,7 @@ body.dark-mode .cover-upload-zone[style*="rgb(16, 185, 129)"] { background: #173
             </div>
             <div class="modal-field">
                 <label for="modal-model-url">Link HTTPS do modelo</label>
-                <input id="modal-model-url" name="url" type="url" placeholder="https://huggingface.co/.../resolve/main/model.pth">
+                <input id="modal-model-url" name="url" type="url" placeholder="https://huggingface.co/.../resolve/main/model.pth ou modelo.zip">
                 <small>O link permanece hospedado na origem. Selecione arquivos abaixo para enviá-los ao Storage público do Supabase.</small>
             </div>
             <div class="modal-field">
@@ -2340,12 +2340,12 @@ function getVoiceModelAssetUrl(asset) {
     return '';
 }
 
-function validateHuggingFacePthUrl(value) {
+function validateHuggingFaceModelUrl(value) {
     let url;
     try {
         url = new URL(String(value || '').trim());
     } catch {
-        throw new Error('Informe um link direto válido para o arquivo .pth do modelo.');
+        throw new Error('Informe um link direto válido para o arquivo .pth ou .zip do modelo.');
     }
 
     let pathname;
@@ -2358,9 +2358,9 @@ function validateHuggingFacePthUrl(value) {
     if (
         url.protocol !== 'https:'
         || !['huggingface.co', 'www.huggingface.co'].includes(url.hostname.toLowerCase())
-        || !/\/resolve\/[^/]+\/.+\.pth$/i.test(pathname)
+        || !/\/resolve\/[^/]+\/.+\.(?:pth|zip)$/i.test(pathname)
     ) {
-        throw new Error('Use o link direto do Hugging Face no formato https://huggingface.co/.../resolve/main/arquivo.pth.');
+        throw new Error('Use um link direto do Hugging Face terminado em .pth ou .zip, no formato https://huggingface.co/.../resolve/main/arquivo.pth ou arquivo.zip.');
     }
 
     return url.toString();
@@ -2408,23 +2408,24 @@ async function saveCoverCreation() {
         const model = models.find(item => String(item.id) === selectedCoverModelId);
         if (!model) throw new Error('O modelo selecionado não está mais disponível. Selecione-o novamente.');
 
-        const modelFile = findModelAsset(model, 'pth');
+        const modelFile = findModelAsset(model, 'pth') || findModelAsset(model, 'zip');
         const indexFile = findModelAsset(model, 'index');
         const modelUrl = getVoiceModelAssetUrl(modelFile);
         const indexUrl = getVoiceModelAssetUrl(indexFile);
         if (!modelUrl) {
             throw new Error(
-                'Não foi possível localizar um arquivo de pesos .pth válido neste modelo. '
+                'Não foi possível localizar um arquivo .pth ou pacote .zip válido neste modelo. '
                 + 'Reimporte adicionando o link direto do Hugging Face '
-                + '(https://huggingface.co/.../resolve/main/arquivo.pth) ou o arquivo .pth local.'
+                + '(https://huggingface.co/.../resolve/main/arquivo.pth ou arquivo.zip) '
+                + 'ou os arquivos RVC locais.'
             );
         }
         try {
-            validateHuggingFacePthUrl(modelUrl);
+            validateHuggingFaceModelUrl(modelUrl);
         } catch {
             const isStorageAsset = Boolean(modelFile?.path);
             if (!isStorageAsset) {
-                throw new Error('O link de pesos deste modelo não foi reconhecido. Reimporte um link direto HTTPS do Hugging Face terminado em .pth.');
+                throw new Error('O link do modelo não foi reconhecido. Reimporte um link HTTPS direto do Hugging Face terminado em .pth ou .zip.');
             }
         }
 
@@ -3013,9 +3014,9 @@ async function createCloudVoiceModel({ name, creator, category, gender = 'outros
     }
     if (sourceUrl) {
         try {
-            sourceUrl = validateHuggingFacePthUrl(sourceUrl);
+            sourceUrl = validateHuggingFaceModelUrl(sourceUrl);
         } catch (error) {
-            throw new Error(error.message || 'Informe um link direto do Hugging Face para um arquivo .pth.');
+            throw new Error(error.message || 'Informe um link direto do Hugging Face para um arquivo .pth ou .zip.');
         }
     }
 
@@ -3097,12 +3098,12 @@ importModalForm.addEventListener('submit', async event => {
         return;
     }
     if (!files.length && !modelUrl) {
-        showToast('Selecione arquivos RVC ou informe o link direto do Hugging Face para um arquivo .pth.', 'danger');
+        showToast('Selecione arquivos RVC ou informe um link direto do Hugging Face para um arquivo .pth ou .zip.', 'danger');
         return;
     }
     if (modelUrl) {
         try {
-            validateHuggingFacePthUrl(modelUrl);
+            validateHuggingFaceModelUrl(modelUrl);
         } catch (error) {
             showToast(error.message, 'danger');
             return;
@@ -3246,12 +3247,12 @@ async function publishModel() {
     const sourceUrl = activeImportTab === 'link' ? document.getElementById('import-url').value.trim() : '';
     const files = activeImportTab === 'file' ? selectedModelFiles : [];
     if (!files.length && !sourceUrl) {
-        showToast('Selecione arquivos RVC ou informe o link direto do Hugging Face para um arquivo .pth.', 'danger');
+        showToast('Selecione arquivos RVC ou informe um link direto do Hugging Face para um arquivo .pth ou .zip.', 'danger');
         return;
     }
     if (sourceUrl) {
         try {
-            validateHuggingFacePthUrl(sourceUrl);
+            validateHuggingFaceModelUrl(sourceUrl);
         } catch (error) {
             showToast(error.message, 'danger');
             return;
