@@ -321,6 +321,7 @@ body { background-color: var(--bg-main); color: var(--text-main); height: 100vh;
 .cover-audio-tabs { display: flex; gap: 8px; margin-bottom: 24px; padding: 4px; background: var(--bg-input); border-radius: 9999px; width: fit-content; border: 1px solid var(--border-color); }
 .cover-audio-tab { padding: 8px 20px; border-radius: 9999px; background: transparent; border: none; font-size: 13px; font-weight: 600; color: var(--text-sidebar); cursor: pointer; transition: all 0.15s; font-family: inherit; white-space: nowrap; }
 .cover-audio-tab:hover { color: var(--text-main); }
+.cover-audio-tab:disabled { opacity: 0.5; cursor: not-allowed; }
 .cover-audio-tab.active { background: var(--accent); color: var(--accent-text); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); }
 .cover-panel { display: none; }
 .cover-panel.active { display: block; animation: coverFadeIn 0.25s; }
@@ -1263,19 +1264,19 @@ body.dark-mode .cover-upload-zone[style*="rgb(16, 185, 129)"] { background: #173
         <div class="cover-modal-body">
                     <div class="generating-overlay" id="generating-overlay">
                         <div class="generating-spinner"></div>
-                        <h3>Preparando sua solicitação...</h3>
-                        <p>Registrando o cover em Minhas Criações</p>
+                        <h3>Enviando áudio para processamento...</h3>
+                        <p>O player aparecerá em Minhas Criações quando o cover estiver pronto.</p>
             </div>
 
             <!-- ABAS SEMPRE VISÍVEIS -->
             <div class="cover-audio-tabs">
                 <button class="cover-audio-tab active" data-cover-tab="audio">Áudio</button>
-                <button class="cover-audio-tab" data-cover-tab="tts">Texto para Voz</button>
-                <button class="cover-audio-tab" data-cover-tab="record">Gravação</button>
+                <button class="cover-audio-tab" data-cover-tab="tts" disabled aria-disabled="true" title="Ainda não disponível">Texto para Voz</button>
+                <button class="cover-audio-tab" data-cover-tab="record" disabled aria-disabled="true" title="Ainda não disponível">Gravação</button>
             </div>
 
             <div class="cover-panel active" id="cover-panel-audio">
-                <div class="cover-section">
+                <div class="cover-section" hidden>
                     <div class="cover-section-title">Usado recentemente</div>
                     <div class="recent-audios">
                         <div class="recent-audio-item" onclick="selectRecentAudio(this, 'Lolly O — Japanese Boy')">
@@ -1378,7 +1379,7 @@ body.dark-mode .cover-upload-zone[style*="rgb(16, 185, 129)"] { background: #173
                 </button>
             </div>
             <button class="btn-cover-next" id="cover-btn-next" onclick="advanceCoverStep()" disabled>
-                Avançar
+                Gerar cover
                 <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
             </button>
         </div>
@@ -1416,6 +1417,7 @@ body.dark-mode .cover-upload-zone[style*="rgb(16, 185, 129)"] { background: #173
 const SUPABASE_URL = 'https://vvlrmoedtuyxakidizhl.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_pPXz6iHNxysSueCQZzpP5A_aw8Ych0E';
 const RVC_STORAGE_BUCKET = 'rvc-models';
+const COVER_INPUT_BUCKET = 'covers_input';
 const MAX_RVC_FILE_SIZE = 50 * 1024 * 1024;
 const APP_REDIRECT_URL = window.location.origin;
 const supabaseClient = window.supabase.createClient(
@@ -1942,7 +1944,7 @@ function renderMyCreations() {
     }
 
     const items = creations
-        .filter(item => item.type === activeCreationType)
+        .filter(item => item.type === activeCreationType && !(item.type === 'covers' && item.status === 'legacy'))
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     if (!items.length) {
         const emptyState = document.createElement('div');
@@ -2020,12 +2022,26 @@ function renderMyCreations() {
         } else {
             const status = document.createElement('span');
             status.className = 'creation-status';
-            status.textContent = 'Sem áudio gerado';
+            const statusLabels = {
+                pending: 'Na fila',
+                processing: 'Gerando cover',
+                completed: 'Cover pronto',
+                failed: 'Falha ao gerar',
+                legacy: 'Pedido antigo'
+            };
+            status.textContent = statusLabels[item.status] || 'Aguardando worker';
             actions.append(status);
-            const note = document.createElement('p');
-            note.className = 'creation-note';
-            note.textContent = item.note || 'A solicitação foi registrada, mas o motor de geração ainda não fornece um arquivo de áudio.';
-            info.append(note);
+            if (item.status === 'failed') {
+                const note = document.createElement('p');
+                note.className = 'creation-note';
+                note.textContent = 'Não foi possível gerar este cover. Tente novamente.';
+                info.append(note);
+            } else if (item.status === 'legacy') {
+                const note = document.createElement('p');
+                note.className = 'creation-note';
+                note.textContent = 'Este pedido foi salvo antes da conexão com a fila. Crie um novo cover para processá-lo.';
+                info.append(note);
+            }
         }
 
         const removeButton = document.createElement('button');
@@ -2053,6 +2069,135 @@ function saveCreations(creations) {
         console.error('Não foi possível salvar Minhas Criações:', error);
         showToast('Não foi possível salvar o histórico neste navegador.', 'danger');
         return false;
+    }
+}
+
+let coverJobPollTimer = null;
+let coverJobPollUserId = null;
+let coverJobPollInFlight = false;
+let coverJobPollRequested = false;
+let coverJobPollErrorShown = false;
+
+function stopCoverJobPolling() {
+    if (coverJobPollTimer !== null) {
+        clearTimeout(coverJobPollTimer);
+        coverJobPollTimer = null;
+    }
+    coverJobPollUserId = null;
+}
+
+function startCoverJobPolling(userId) {
+    if (!userId) {
+        stopCoverJobPolling();
+        return;
+    }
+    if (coverJobPollUserId === userId) {
+        if (coverJobPollInFlight) {
+            coverJobPollRequested = true;
+        } else if (coverJobPollTimer === null) {
+            void pollCoverJobs(userId);
+        }
+        return;
+    }
+    stopCoverJobPolling();
+    coverJobPollUserId = userId;
+    void pollCoverJobs(userId);
+}
+
+function findModelForQueueJob(job) {
+    return models.find(model =>
+        model.id === String(job.model_id || '')
+        || model.modelFiles.some(file => file.url === job.model_id)
+    );
+}
+
+async function pollCoverJobs(userId) {
+    if (coverJobPollInFlight || coverJobPollUserId !== userId) return;
+    coverJobPollInFlight = true;
+    let retry = true;
+
+    try {
+        const { data, error } = await supabaseClient
+            .from('covers_queue')
+            .select('id,status,result_url,error_message,created_at,model_id,audio_url,youtube_url,user_id')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+            .limit(100);
+        if (error) throw error;
+        if (currentUser?.id !== userId || coverJobPollUserId !== userId) return;
+
+        const creations = readCreations();
+        if (!creations) throw new Error('Não foi possível ler o histórico local de criações.');
+        const byJobId = new Map(
+            creations
+                .filter(item => item.type === 'covers' && item.jobId)
+                .map(item => [String(item.jobId), item])
+        );
+        const otherCreations = creations.filter(item => item.type !== 'covers');
+        const coverItems = [];
+
+        (data || []).forEach(job => {
+            const jobId = String(job.id);
+            const previous = byJobId.get(jobId);
+            const model = findModelForQueueJob(job);
+            const sourceName = previous?.sourceName
+                || (job.youtube_url ? 'YouTube' : 'Áudio enviado');
+            const modelName = previous?.modelName || model?.name || 'AI Cover';
+            const resultUrl = typeof job.result_url === 'string' && /^https:\/\//i.test(job.result_url)
+                ? job.result_url
+                : '';
+
+            coverItems.push({
+                ...previous,
+                id: jobId,
+                jobId,
+                type: 'covers',
+                title: previous?.title || `${modelName} — ${sourceName}`,
+                modelName,
+                sourceName,
+                imageUrl: previous?.imageUrl || model?.image || '',
+                createdAt: job.created_at || previous?.createdAt || new Date().toISOString(),
+                status: job.status,
+                outputUrl: resultUrl,
+                errorMessage: job.status === 'failed' ? job.error_message || '' : ''
+            });
+        });
+
+        const legacyItems = creations.filter(item =>
+            item.type === 'covers' && !item.jobId
+        ).map(item => ({ ...item, status: 'legacy' }));
+        const nextCreations = [...otherCreations, ...coverItems, ...legacyItems]
+            .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+            .slice(-100);
+
+        if (JSON.stringify(creations) !== JSON.stringify(nextCreations)) {
+            if (!saveCreations(nextCreations)) {
+                throw new Error('Não foi possível salvar as atualizações do cover no histórico local.');
+            }
+            renderMyCreations();
+        }
+
+        retry = coverItems.some(item => item.status === 'pending' || item.status === 'processing');
+        coverJobPollErrorShown = false;
+    } catch (error) {
+        console.error('Não foi possível sincronizar a fila de covers:', error);
+        if (!coverJobPollErrorShown) {
+            showToast('Não foi possível atualizar o status dos covers. Verifique a conexão e as políticas RLS.', 'danger');
+            coverJobPollErrorShown = true;
+        }
+    } finally {
+        coverJobPollInFlight = false;
+        const pollAgain = coverJobPollRequested;
+        coverJobPollRequested = false;
+        if (coverJobPollUserId === userId) {
+            if (retry || pollAgain) {
+                coverJobPollTimer = setTimeout(() => void pollCoverJobs(userId), 5000);
+            } else {
+                coverJobPollTimer = null;
+            }
+        } else if (coverJobPollUserId) {
+            void pollCoverJobs(coverJobPollUserId);
+        }
     }
 }
 
@@ -2185,40 +2330,129 @@ document.addEventListener('keydown', event => {
     }
 });
 
-function saveCoverCreation() {
-    const creations = readCreations();
-    if (!creations) {
-        showToast('Não foi possível carregar o histórico para salvar este cover.', 'danger');
+function getVoiceModelAssetUrl(asset) {
+    if (typeof asset?.url === 'string' && /^https:\/\//i.test(asset.url)) return asset.url;
+    if (typeof asset?.path === 'string' && asset.path) {
+        return supabaseClient.storage.from(RVC_STORAGE_BUCKET).getPublicUrl(asset.path).data.publicUrl;
+    }
+    return '';
+}
+
+async function saveCoverCreation() {
+    let uploadedPath = '';
+    let jobCreated = false;
+
+    try {
+        const { data: authData, error: authError } = await supabaseClient.auth.getUser();
+        if (authError) throw authError;
+        const user = authData.user;
+        if (!user || user.id !== currentUser?.id) {
+            throw new Error('Entre na sua conta antes de criar um cover.');
+        }
+
+        const creations = readCreations();
+        if (!creations) throw new Error('Não foi possível carregar o histórico para salvar este cover.');
+
+        const model = models.find(item => String(item.id) === selectedCoverModelId);
+        if (!model) throw new Error('O modelo selecionado não está mais disponível. Selecione-o novamente.');
+
+        const modelFile = model.modelFiles.find(asset =>
+            /\.pth(?:$|[?#])/i.test(String(asset.name || asset.path || asset.url || ''))
+        );
+        const indexFile = model.modelFiles.find(asset =>
+            /\.index(?:$|[?#])/i.test(String(asset.name || asset.path || asset.url || ''))
+        );
+        const modelUrl = getVoiceModelAssetUrl(modelFile);
+        const indexUrl = getVoiceModelAssetUrl(indexFile);
+        if (!modelUrl) throw new Error('Este modelo não tem um arquivo .pth disponível para inferência.');
+
+        const activeAudioTab = document.querySelector('.cover-audio-tab.active')?.dataset.coverTab;
+        if (activeAudioTab !== 'audio') {
+            throw new Error('Por enquanto, escolha um arquivo de áudio ou um vídeo do YouTube.');
+        }
+
+        const sourceFile = coverFileInput?.files?.[0] || null;
+        const youtubeUrl = youtubeConfirmed ? currentYoutubeData?.url || '' : '';
+        if (Boolean(sourceFile) === Boolean(youtubeUrl)) {
+            throw new Error('Escolha apenas um áudio: envie um arquivo ou confirme um link do YouTube.');
+        }
+
+        const sourceName = youtubeUrl ? currentYoutubeData.title : sourceFile.name;
+        const jobId = crypto.randomUUID();
+        let audioUrl = null;
+        if (sourceFile) {
+            const safeName = sanitizeStorageFilename(sourceFile.name);
+            uploadedPath = `${user.id}/${jobId}/${safeName}`;
+            const { error: uploadError } = await supabaseClient.storage
+                .from(COVER_INPUT_BUCKET)
+                .upload(uploadedPath, sourceFile, {
+                    cacheControl: '3600',
+                    upsert: false,
+                    contentType: sourceFile.type || 'application/octet-stream'
+                });
+            if (uploadError) throw uploadError;
+            audioUrl = `storage://${COVER_INPUT_BUCKET}/${uploadedPath}`;
+        }
+
+        const { data: job, error: insertError } = await supabaseClient
+            .from('covers_queue')
+            .insert({
+                id: jobId,
+                user_id: user.id,
+                status: 'pending',
+                model_id: modelUrl,
+                index_url: indexUrl || null,
+                audio_url: audioUrl,
+                youtube_url: youtubeUrl || null,
+                pitch: 0
+            })
+            .select('id,status,created_at')
+            .single();
+        if (insertError) throw insertError;
+        jobCreated = true;
+
+        const item = {
+            id: job.id,
+            jobId: job.id,
+            type: 'covers',
+            title: `${model.name} — ${sourceName}`,
+            modelName: model.name,
+            sourceName,
+            imageUrl: model.image && /^https:\/\//i.test(model.image) ? model.image : '',
+            createdAt: job.created_at || new Date().toISOString(),
+            status: job.status || 'pending',
+            outputUrl: ''
+        };
+        const currentCreations = readCreations();
+        if (!currentCreations) {
+            console.error('Job enviado, mas não foi possível ler o histórico local:', job.id);
+            startCoverJobPolling(user.id);
+            renderMyCreations();
+            return true;
+        }
+        const updatedCreations = [
+            ...currentCreations.filter(creation => creation.jobId !== item.jobId && creation.id !== item.id),
+            item
+        ];
+        if (!saveCreations(updatedCreations)) {
+            console.error('Job enviado ao worker, mas não foi possível salvar a cópia local:', job.id);
+        }
+        renderMyCreations();
+        startCoverJobPolling(user.id);
+        return true;
+    } catch (error) {
+        if (uploadedPath && !jobCreated) {
+            const { error: cleanupError } = await supabaseClient.storage
+                .from(COVER_INPUT_BUCKET)
+                .remove([uploadedPath]);
+            if (cleanupError) {
+                console.error('Não foi possível remover o áudio enviado após falha ao criar o job:', cleanupError);
+            }
+        }
+        console.error('Não foi possível enviar o cover para a fila:', error);
+        showToast(`Não foi possível enviar o cover: ${error.message || 'tente novamente.'}`, 'danger');
         return false;
     }
-    const model = models.find(item => String(item.id) === selectedCoverModelId);
-    const activeAudioTab = document.querySelector('.cover-audio-tab.active')?.dataset.coverTab;
-    const sourceFile = coverFileInput?.files?.[0];
-    const selectedRecentAudio = document.querySelector('.recent-audio-item.selected .recent-audio-name')?.textContent?.trim();
-    const sourceName = activeAudioTab === 'tts'
-        ? 'Texto para voz'
-        : activeAudioTab === 'record'
-            ? `Gravação (${document.getElementById('cover-record-timer')?.textContent || 'áudio'})`
-            : currentYoutubeData?.title
-                || sourceFile?.name
-                || selectedRecentAudio
-                || 'Áudio selecionado';
-    const modelName = model?.name || 'Modelo de voz';
-    const id = typeof crypto.randomUUID === 'function'
-        ? crypto.randomUUID()
-        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    const saved = saveCreations([...creations, {
-        id,
-        type: 'covers',
-        title: `${modelName} — ${sourceName}`,
-        modelName,
-        sourceName,
-        imageUrl: model?.image && /^https:\/\//i.test(model.image) ? model.image : '',
-        createdAt: new Date().toISOString(),
-        note: 'Esta versão registra a solicitação, mas ainda não está conectada ao motor que gera e exporta o áudio.'
-    }]);
-    if (saved) renderMyCreations();
-    return saved;
 }
 
 document.querySelectorAll('.creation-tab').forEach(tab => {
@@ -3014,7 +3248,7 @@ let youtubeConfirmed = false;
 let currentYoutubeData = null;
 let currentStep = 2; // Etapa atual (2 = Áudio, 3 = Ajustes)
 let selectedCoverModelId = null;
-let coverGenerationTimer = null;
+let coverSubmissionInProgress = false;
 const coverBtnNext = document.getElementById('cover-btn-next');
 const coverBtnBack = document.getElementById('cover-btn-back');
 const generatingOverlay = document.getElementById('generating-overlay');
@@ -3038,10 +3272,6 @@ function openCoverModal(modelId) {
 }
 
 function closeCoverModal() {
-    if (coverGenerationTimer !== null) {
-        clearTimeout(coverGenerationTimer);
-        coverGenerationTimer = null;
-    }
     document.getElementById('cover-modal').classList.remove('active');
     document.body.style.overflow = '';
     document.querySelectorAll('.cover-audio-tab').forEach((t, i) => t.classList.toggle('active', i === 0));
@@ -3068,6 +3298,10 @@ document.addEventListener('keydown', (e) => {
 document.querySelectorAll('.cover-audio-tab').forEach(tab => {
     tab.addEventListener('click', function() {
         const panelName = this.dataset.coverTab;
+        if (panelName !== 'audio') {
+            showToast('Texto para voz e gravação ainda não estão conectados ao worker. Use um arquivo ou link do YouTube.', 'danger');
+            return;
+        }
         document.querySelectorAll('.cover-audio-tab').forEach(t => t.classList.remove('active'));
         this.classList.add('active');
         document.querySelectorAll('.cover-panel').forEach(p => p.classList.remove('active'));
@@ -3154,7 +3388,7 @@ async function processYoutubeUrl() {
             id: videoId,
             title: title,
             thumbnail: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
-            url: url
+            url: `https://www.youtube.com/watch?v=${videoId}`
         };
 
         document.getElementById('youtube-thumb').src = currentYoutubeData.thumbnail;
@@ -3221,17 +3455,10 @@ function updateNextButton() {
     let enabled = false;
 
     if (activeTab === 'audio') {
-        const hasRecent = document.querySelector('.recent-audio-item.selected');
-        enabled = !!currentYoutubeData || selectedCoverAudio || !!hasRecent;
-    } else if (activeTab === 'tts') {
-        const text = document.getElementById('cover-tts-text')?.value.trim();
-        enabled = !!(text && text.length > 0);
-    } else if (activeTab === 'record') {
-        const timer = document.getElementById('cover-record-timer')?.textContent || '00:00';
-        enabled = timer !== '00:00';
+        enabled = (youtubeConfirmed && Boolean(currentYoutubeData?.url)) || selectedCoverAudio;
     }
 
-    coverBtnNext.disabled = !enabled;
+    coverBtnNext.disabled = !enabled || coverSubmissionInProgress;
 }
 
 /* =========================================================
@@ -3284,28 +3511,25 @@ function goToStep3() {
 /* =========================================================
    AVANÇAR — Transição para Etapa 3
    ========================================================= */
-function advanceCoverStep() {
-    if (coverBtnNext.disabled) return;
+async function advanceCoverStep() {
+    if (coverBtnNext.disabled || coverSubmissionInProgress) return;
 
-    // Se já está no Step 3, não faz nada
-    if (currentStep === 3) return;
-
-    // Transição visual para o Step 3
-    goToStep3();
-
-    // Registra a solicitação na biblioteca de criações.
+    coverSubmissionInProgress = true;
+    updateNextButton();
     generatingOverlay.classList.add('active');
-
-    coverGenerationTimer = setTimeout(() => {
-        coverGenerationTimer = null;
+    try {
+        const saved = await saveCoverCreation();
         generatingOverlay.classList.remove('active');
-        const saved = saveCoverCreation();
-        closeCoverModal();
         if (saved) {
+            closeCoverModal();
             switchTab('minhas-criacoes');
-            showToast('Solicitação adicionada a Minhas Criações.', 'success');
+            showToast('Cover enviado para processamento. O player será atualizado automaticamente.', 'success');
         }
-    }, 2000);
+    } finally {
+        generatingOverlay.classList.remove('active');
+        coverSubmissionInProgress = false;
+        updateNextButton();
+    }
 }
 
 /* =========================================================
@@ -3520,6 +3744,7 @@ function cleanOAuthCallbackUrl() {
 function syncAuthUser(user) {
     authInitialized = true;
     if (!user) {
+        stopCoverJobPolling();
         currentUser = null;
         favoriteLoadRequest++;
         favoriteModelIds.clear();
@@ -3545,6 +3770,7 @@ function syncAuthUser(user) {
         name,
         avatar: metadata.avatar_url || metadata.picture || generateFallbackImage(name)
     };
+    startCoverJobPolling(user.id);
     cleanOAuthCallbackUrl();
     updateAuthUI();
     loadFavorites();
