@@ -2340,6 +2340,56 @@ function getVoiceModelAssetUrl(asset) {
     return '';
 }
 
+function validateHuggingFacePthUrl(value) {
+    let url;
+    try {
+        url = new URL(String(value || '').trim());
+    } catch {
+        throw new Error('Informe um link direto válido para o arquivo .pth do modelo.');
+    }
+
+    let pathname;
+    try {
+        pathname = decodeURIComponent(url.pathname);
+    } catch {
+        throw new Error('O link do modelo contém caracteres inválidos.');
+    }
+
+    if (
+        url.protocol !== 'https:'
+        || !['huggingface.co', 'www.huggingface.co'].includes(url.hostname.toLowerCase())
+        || !/\/resolve\/[^/]+\/.+\.pth$/i.test(pathname)
+    ) {
+        throw new Error('Use o link direto do Hugging Face no formato https://huggingface.co/.../resolve/main/arquivo.pth.');
+    }
+
+    return url.toString();
+}
+
+function getModelAssetExtension(value) {
+    if (typeof value !== 'string' || !value.trim()) return '';
+    let pathname;
+    try {
+        pathname = new URL(value, window.location.origin).pathname;
+    } catch {
+        pathname = value.split(/[?#]/, 1)[0];
+    }
+    try {
+        pathname = decodeURIComponent(pathname);
+    } catch {
+        return '';
+    }
+    return pathname.match(/\.([a-z0-9]+)$/i)?.[1]?.toLowerCase() || '';
+}
+
+function findModelAsset(model, extension) {
+    return model.modelFiles.find(asset =>
+        [asset.name, asset.path, asset.url].some(value =>
+            getModelAssetExtension(value) === extension
+        )
+    );
+}
+
 async function saveCoverCreation() {
     let uploadedPath = '';
     let jobCreated = false;
@@ -2358,15 +2408,25 @@ async function saveCoverCreation() {
         const model = models.find(item => String(item.id) === selectedCoverModelId);
         if (!model) throw new Error('O modelo selecionado não está mais disponível. Selecione-o novamente.');
 
-        const modelFile = model.modelFiles.find(asset =>
-            /\.pth(?:$|[?#])/i.test(String(asset.name || asset.path || asset.url || ''))
-        );
-        const indexFile = model.modelFiles.find(asset =>
-            /\.index(?:$|[?#])/i.test(String(asset.name || asset.path || asset.url || ''))
-        );
+        const modelFile = findModelAsset(model, 'pth');
+        const indexFile = findModelAsset(model, 'index');
         const modelUrl = getVoiceModelAssetUrl(modelFile);
         const indexUrl = getVoiceModelAssetUrl(indexFile);
-        if (!modelUrl) throw new Error('Este modelo não tem um arquivo .pth disponível para inferência.');
+        if (!modelUrl) {
+            throw new Error(
+                'Não foi possível localizar um arquivo de pesos .pth válido neste modelo. '
+                + 'Reimporte adicionando o link direto do Hugging Face '
+                + '(https://huggingface.co/.../resolve/main/arquivo.pth) ou o arquivo .pth local.'
+            );
+        }
+        try {
+            validateHuggingFacePthUrl(modelUrl);
+        } catch {
+            const isStorageAsset = Boolean(modelFile?.path);
+            if (!isStorageAsset) {
+                throw new Error('O link de pesos deste modelo não foi reconhecido. Reimporte um link direto HTTPS do Hugging Face terminado em .pth.');
+            }
+        }
 
         const activeAudioTab = document.querySelector('.cover-audio-tab.active')?.dataset.coverTab;
         if (activeAudioTab !== 'audio') {
@@ -2952,13 +3012,11 @@ async function createCloudVoiceModel({ name, creator, category, gender = 'outros
         throw new Error('Use arquivos .zip, .pth ou .index.');
     }
     if (sourceUrl) {
-        let parsedUrl;
         try {
-            parsedUrl = new URL(sourceUrl);
-        } catch {
-            throw new Error('Informe um link válido para o modelo.');
+            sourceUrl = validateHuggingFacePthUrl(sourceUrl);
+        } catch (error) {
+            throw new Error(error.message || 'Informe um link direto do Hugging Face para um arquivo .pth.');
         }
-        if (parsedUrl.protocol !== 'https:') throw new Error('O link do modelo deve usar HTTPS.');
     }
 
     const userId = currentUser.id;
@@ -2970,9 +3028,15 @@ async function createCloudVoiceModel({ name, creator, category, gender = 'outros
         }
         if (sourceUrl) {
             const url = new URL(sourceUrl);
+            let fileName;
+            try {
+                fileName = decodeURIComponent(url.pathname.split('/').pop() || 'modelo.pth');
+            } catch {
+                throw new Error('O nome do arquivo no link do modelo contém caracteres inválidos.');
+            }
             uploadedAssets.push({
                 kind: 'external',
-                name: decodeURIComponent(url.pathname.split('/').pop() || 'modelo RVC'),
+                name: fileName,
                 url: url.toString()
             });
         }
@@ -3033,19 +3097,14 @@ importModalForm.addEventListener('submit', async event => {
         return;
     }
     if (!files.length && !modelUrl) {
-        showToast('Selecione arquivos RVC ou informe um link HTTPS.', 'danger');
+        showToast('Selecione arquivos RVC ou informe o link direto do Hugging Face para um arquivo .pth.', 'danger');
         return;
     }
     if (modelUrl) {
-        let parsedUrl;
         try {
-            parsedUrl = new URL(modelUrl);
-        } catch {
-            showToast('Informe um link HTTPS válido para o modelo.', 'danger');
-            return;
-        }
-        if (parsedUrl.protocol !== 'https:') {
-            showToast('O link do modelo deve usar HTTPS.', 'danger');
+            validateHuggingFacePthUrl(modelUrl);
+        } catch (error) {
+            showToast(error.message, 'danger');
             return;
         }
     }
@@ -3187,14 +3246,14 @@ async function publishModel() {
     const sourceUrl = activeImportTab === 'link' ? document.getElementById('import-url').value.trim() : '';
     const files = activeImportTab === 'file' ? selectedModelFiles : [];
     if (!files.length && !sourceUrl) {
-        showToast('Selecione arquivos RVC ou informe um link HTTPS.', 'danger');
+        showToast('Selecione arquivos RVC ou informe o link direto do Hugging Face para um arquivo .pth.', 'danger');
         return;
     }
     if (sourceUrl) {
         try {
-            if (new URL(sourceUrl).protocol !== 'https:') throw new Error();
-        } catch {
-            showToast('Informe um link HTTPS válido para o modelo.', 'danger');
+            validateHuggingFacePthUrl(sourceUrl);
+        } catch (error) {
+            showToast(error.message, 'danger');
             return;
         }
     }
